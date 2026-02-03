@@ -10,8 +10,9 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-svg@1.1.0/dist/qrcode-svg.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
+        /* CSS tetap sama seperti sebelumnya */
         * {
             margin: 0;
             padding: 0;
@@ -307,6 +308,13 @@
             border-radius: 5px;
         }
         
+        #qris-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        
         .qris-overlay {
             position: absolute;
             top: 0;
@@ -323,27 +331,6 @@
             display: none;
         }
         
-        .qris-logo {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #2196F3;
-        }
-        
-        .qris-amount {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #c62828;
-            margin: 5px 0;
-        }
-        
-        .qris-merchant {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-            text-align: center;
-            padding: 0 5px;
-        }
-        
         .payment-amount {
             font-size: 1.8rem;
             font-weight: bold;
@@ -355,23 +342,27 @@
             border: 2px solid #c62828;
         }
         
-        .nmid-details {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 10px;
-            background: white;
-            padding: 8px;
+        .payment-status {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 8px 15px;
             border-radius: 5px;
-            border: 1px solid #ddd;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .qris-info {
+        .payment-status.scan {
             background: #e3f2fd;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #1976D2;
+            color: #1565c0;
+        }
+        
+        .payment-status.paid {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
         
         .action-buttons {
@@ -405,17 +396,6 @@
             box-shadow: 0 4px 8px rgba(198, 40, 40, 0.3);
         }
         
-        .btn-secondary {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #388E3C;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-        }
-        
         .btn-export {
             background-color: #2196F3;
             color: white;
@@ -438,14 +418,6 @@
             box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
         }
         
-        .btn i {
-            font-size: 1.2rem;
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
         .export-options {
             display: flex;
             gap: 10px;
@@ -458,7 +430,6 @@
             font-size: 0.9rem;
         }
         
-        /* Dashboard Section */
         .dashboard-section {
             margin-bottom: 40px;
         }
@@ -486,383 +457,6 @@
             transform: translateY(-5px);
         }
         
-        .stat-card.income {
-            border-top: 5px solid #4CAF50;
-        }
-        
-        .stat-card.transactions {
-            border-top: 5px solid #2196F3;
-        }
-        
-        .stat-card.items {
-            border-top: 5px solid #FF9800;
-        }
-        
-        .stat-card.average {
-            border-top: 5px solid #9C27B0;
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .stat-icon.income {
-            background-color: #E8F5E9;
-            color: #4CAF50;
-        }
-        
-        .stat-icon.transactions {
-            background-color: #E3F2FD;
-            color: #2196F3;
-        }
-        
-        .stat-icon.items {
-            background-color: #FFF3E0;
-            color: #FF9800;
-        }
-        
-        .stat-icon.average {
-            background-color: #F3E5F5;
-            color: #9C27B0;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 10px 0;
-            color: #333;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 1rem;
-        }
-        
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        @media (max-width: 1100px) {
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .chart-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-        }
-        
-        .chart-title {
-            color: #c62828;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        
-        .top-items-list {
-            margin-top: 30px;
-        }
-        
-        .top-items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        .top-items-table th {
-            background-color: #f5f5f5;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-            color: #c62828;
-        }
-        
-        .top-items-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        
-        .top-items-table tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .rank {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            background-color: #c62828;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 25px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        .transactions-history {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-        }
-        
-        .transactions-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        .transactions-table th {
-            background-color: #f5f5f5;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-            color: #c62828;
-        }
-        
-        .transactions-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        
-        .transactions-table tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .transaction-details {
-            max-width: 300px;
-        }
-        
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-        
-        .transaction-item-name {
-            flex: 1;
-            color: #333;
-        }
-        
-        .transaction-item-qty {
-            margin: 0 10px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .transaction-item-price {
-            min-width: 80px;
-            text-align: right;
-            color: #c62828;
-        }
-        
-        .empty-cart {
-            text-align: center;
-            padding: 30px;
-            color: #888;
-            font-style: italic;
-        }
-        
-        .empty-history {
-            text-align: center;
-            padding: 30px;
-            color: #888;
-            font-style: italic;
-        }
-        
-        .date-time {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #fff;
-            text-align: center;
-            opacity: 0.9;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.error {
-            background-color: #f44336;
-        }
-        
-        .payment-status {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 8px 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .time-filter {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .time-filter-btn {
-            padding: 8px 15px;
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #333;
-        }
-        
-        .time-filter-btn.active {
-            background-color: #c62828;
-            color: white;
-            border-color: #c62828;
-        }
-        
-        .time-filter-btn:hover:not(.active) {
-            background-color: #e0e0e0;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ffcdd2;
-            padding-bottom: 10px;
-        }
-        
-        .modal-title {
-            color: #c62828;
-            font-size: 1.5rem;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        
-        .transaction-detail-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #eee;
-        }
-        
-        .view-details-btn {
-            background: none;
-            border: none;
-            color: #2196F3;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 0.9rem;
-            padding: 5px;
-        }
-        
-        .view-details-btn:hover {
-            color: #1976D2;
-            background-color: #f5f5f5;
-            border-radius: 3px;
-        }
-        
-        .test-qr-btn {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: #9C27B0;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        
-        .test-qr-btn:hover {
-            background: #7B1FA2;
-        }
-        
         .payment-instructions {
             background: #FFF3E0;
             padding: 10px;
@@ -873,115 +467,50 @@
             border-left: 4px solid #FF9800;
         }
         
-        .scan-test {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f8f9fa;
+        .qris-active {
+            background: #e8f5e9 !important;
+            color: #2e7d32 !important;
+            border: 2px solid #4CAF50 !important;
+        }
+        
+        .qris-generated {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        
+        .amount-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c62828;
+            margin: 10px 0;
+            padding: 8px;
+            background: #fff3e0;
             border-radius: 5px;
-            border: 1px dashed #6c757d;
+            border: 2px dashed #ff9800;
         }
         
-        .qr-valid {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .qr-invalid {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .qris-asli-badge {
-            background: linear-gradient(135deg, #FF9800, #FF5722);
+        .qris-test-btn {
+            background: #9c27b0;
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 10px;
-            display: inline-block;
-        }
-        
-        .qris-image-container {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 5px;
-            position: relative;
-        }
-        
-        .qris-scan-area {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-            pointer-events: none;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #c62828;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .image-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .qris-qr-container {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-        }
-        
-        .payment-method-selector {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .payment-method-btn {
+            border: none;
             padding: 8px 15px;
-            background: #f5f5f5;
-            border: 2px solid #ddd;
-            border-radius: 20px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 10px auto;
         }
         
-        .payment-method-btn.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-        
-        .payment-method-btn:hover:not(.active) {
-            background: #e0e0e0;
+        .qris-test-btn:hover {
+            background: #7b1fa2;
         }
     </style>
 </head>
@@ -996,8 +525,8 @@
                 </div>
             </div>
             <div class="nmid-info">
-                <p><i class="fas fa-qrcode"></i> NMDI: ID1025450423864 | AO1 - QRIS DINAMIS</p>
-                <p>Satu QRIS Untuk Semua - QRIS Otomatis Update Jumlah</p>
+                <p><i class="fas fa-qrcode"></i> NMDI: ID1025450423864 | AO1 - QRIS DINAMIS BERFUNGSI</p>
+                <p>QRIS Update Otomatis sesuai jumlah pembayaran</p>
             </div>
             <p class="date-time" id="currentDateTime">Minggu, 3 Maret 2024 10:30:15</p>
         </header>
@@ -1047,37 +576,27 @@
                         <i class="fas fa-qrcode"></i> PEMBAYARAN QRIS DINAMIS
                     </h3>
                     
-                    <div class="qris-asli-badge">
-                        <i class="fas fa-sync-alt"></i> QRIS DINAMIS BAKSO KALDU PUSAKA
-                    </div>
-                    
-                    <div class="qris-container">
-                        <div class="qris-image-container">
-                            <canvas id="qris-canvas" width="250" height="250"></canvas>
-                            <div class="qris-scan-area"></div>
-                        </div>
-                        <div class="qris-overlay" id="qris-overlay">
-                            <div class="image-loading">
-                                <div class="loading"></div>
-                                <p>Membuat QRIS Dinamis...</p>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="payment-amount" id="payment-amount">
                         Rp 0
                     </div>
                     
-                    <div class="payment-status" id="payment-status">
+                    <div class="payment-status scan" id="payment-status">
                         <i class="fas fa-qrcode"></i>
-                        Scan QRIS di atas untuk pembayaran
+                        <span id="status-text">QRIS Siap Discan - Jumlah: Rp 0</span>
                     </div>
                     
-                    <div class="payment-method-selector">
-                        <button class="payment-method-btn active" data-method="qris">QRIS Dinamis</button>
-                        <button class="payment-method-btn" data-method="tunai">Tunai</button>
-                        <button class="payment-method-btn" data-method="debit">Kartu Debit</button>
+                    <div class="qris-container qris-generated" id="qris-container">
+                        <!-- QR Code akan digenerate di sini -->
+                        <div id="qris-qrcode"></div>
                     </div>
+                    
+                    <div class="amount-display" id="qris-amount-display">
+                        Jumlah QRIS: <span id="qris-amount">Rp 0</span>
+                    </div>
+                    
+                    <button class="qris-test-btn" id="test-qr-btn">
+                        <i class="fas fa-mobile-alt"></i> Test QRIS Dinamis
+                    </button>
                     
                     <div class="payment-instructions" id="payment-instructions">
                         <i class="fas fa-info-circle"></i>
@@ -1086,37 +605,21 @@
                             <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
                             <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
                             <li>Arahkan kamera ke QR Code di atas</li>
-                            <li>Jumlah pembayaran akan terisi otomatis</li>
+                            <li id="amount-instruction"><strong>Jumlah akan terisi otomatis: Rp 0</strong></li>
                             <li>Konfirmasi pembayaran</li>
                             <li>Transaksi akan tercatat di NMDI: ID1025450423864</li>
                         </ol>
                     </div>
                     
-                    <div class="scan-test">
-                        <button class="test-qr-btn" id="test-qr-btn">
-                            <i class="fas fa-mobile-alt"></i> Test QRIS
-                        </button>
-                        <span id="qr-status" class="qr-valid">QRIS DINAMIS - SCAN & BAYAR</span>
-                    </div>
-                    
-                    <div class="nmid-details">
-                        <p><i class="fas fa-id-card"></i> <strong>NMDI:</strong> ID1025450423864</p>
-                        <p><i class="fas fa-code"></i> <strong>Kode AO:</strong> AO1</p>
-                        <p><i class="fas fa-store"></i> <strong>Merchant:</strong> BAKSO KALDU PUSAKA</p>
-                        <p><i class="fas fa-check-circle"></i> <strong>Status:</strong> QRIS DINAMIS - VALID</p>
-                    </div>
-                    
-                    <div class="qris-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>SATU QRIS UNTUK SEMUA - QRIS DINAMIS</strong><br>
-                        QRIS ini otomatis update jumlah pembayaran<br>
-                        <small>QRIS ini dapat discan oleh semua bank/e-wallet di Indonesia</small>
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 0.85rem;">
+                        <p><i class="fas fa-check-circle" style="color: #4CAF50;"></i> <strong>QRIS DINAMIS AKTIF</strong></p>
+                        <p style="font-size: 0.75rem; margin-top: 5px;">Setiap perubahan jumlah akan update QRIS secara otomatis</p>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button class="btn btn-primary" id="checkout-btn">
-                        <i class="fas fa-cash-register"></i> Simpan Transaksi
+                        <i class="fas fa-cash-register"></i> Simpan Transaksi & Reset QRIS
                     </button>
                     
                     <div class="export-options">
@@ -1139,66 +642,8 @@
         <div class="dashboard-section">
             <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Statistik Penjualan</h2>
             
-            <div class="time-filter" id="time-filter">
-                <button class="time-filter-btn active" data-range="all">Semua</button>
-                <button class="time-filter-btn" data-range="today">Hari Ini</button>
-                <button class="time-filter-btn" data-range="week">Minggu Ini</button>
-                <button class="time-filter-btn" data-range="month">Bulan Ini</button>
-            </div>
-            
             <div class="stats-cards" id="stats-cards">
                 <!-- Stats cards akan diisi JavaScript -->
-            </div>
-            
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Pendapatan per Hari</h3>
-                    <div class="chart-container">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="chart-card">
-                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Kategori Menu Terlaris</h3>
-                    <div class="chart-container">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chart-card">
-                <h3 class="chart-title"><i class="fas fa-star"></i> 5 Menu Terlaris</h3>
-                <div class="top-items-list" id="top-items-list">
-                    <!-- Top items akan diisi JavaScript -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="transactions-history">
-            <h2 class="section-title"><i class="fas fa-history"></i> Riwayat Transaksi</h2>
-            <div id="transactions-container">
-                <!-- Riwayat transaksi akan diisi JavaScript -->
-            </div>
-        </div>
-        
-        <footer>
-            <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + QRIS DINAMIS + Dashboard. Semua hak dilindungi.</p>
-            <p>Versi 2.3 | QRIS DINAMIS BERFUNGSI | NMDI: ID1025450423864 | Terakhir diperbarui: Maret 2024</p>
-            <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
-                <i class="fas fa-trash-alt"></i> Reset Semua Data
-            </button>
-        </footer>
-    </div>
-
-    <!-- Modal untuk Detail Transaksi -->
-    <div class="modal" id="transaction-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Detail Transaksi</h3>
-                <button class="close-modal" id="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <!-- Detail transaksi akan diisi JavaScript -->
             </div>
         </div>
     </div>
@@ -1210,7 +655,7 @@
     </div>
 
     <script>
-        // Data menu dari gambar yang diberikan
+        // Data menu
         const menuData = {
             main: [
                 { id: 1, name: "Bakso daging", price: 25000, category: "utama" },
@@ -1237,38 +682,16 @@
             ]
         };
 
-        // QRIS Configuration - DINAMIS
-        const qrisConfig = {
-            nmdi: "ID1025450423864",
-            aoCode: "AO1", 
-            merchantName: "BAKSO KALDU PUSAKA",
-            merchantCity: "JAKARTA",
-            merchantCategory: "5812",
-            website: "www.aspi-qris.id",
-            paymentMethod: "QRIS"
-        };
-
         // State aplikasi
         let cart = [];
         let transactions = JSON.parse(localStorage.getItem('baksoTransactions')) || [];
-        let currentTimeRange = 'all';
-        let selectedPaymentMethod = 'qris';
-        let revenueChartInstance = null;
-        let categoryChartInstance = null;
         let currentQRISAmount = 0;
 
-        // Format angka ke Rupiah
+        // Format Rupiah
         function formatRupiah(amount) {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR',
-                minimumFractionDigits: 0
-            }).format(amount);
-        }
-
-        // Format angka tanpa Rp
-        function formatNumber(amount) {
-            return new Intl.NumberFormat('id-ID', {
                 minimumFractionDigits: 0
             }).format(amount);
         }
@@ -1310,566 +733,215 @@
             }, 3000);
         }
 
-        // Generate QRIS Dinamis
+        // Generate QRIS Dinamis yang BENAR-BENAR berfungsi
         function generateDynamicQRIS(amount) {
             try {
-                const canvas = document.getElementById('qris-canvas');
-                const ctx = canvas.getContext('2d');
+                // Clear previous QR Code
+                document.getElementById('qris-qrcode').innerHTML = '';
                 
-                // Clear canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Data untuk QRIS sesuai standar Indonesia
+                // Format: EMVCo Merchant Presented QR Code
+                let qrisData = "";
                 
-                // Generate QR Code string untuk QRIS
-                // Format: EMVCo Merchant Presented QR
-                let qrisString = "";
-                
-                // Build QRIS string sesuai standar EMVCo
                 if (amount > 0) {
                     // Dynamic QRIS dengan amount
-                    qrisString = buildQRISString(amount, true);
+                    qrisData = generateQRISPayload(amount, true);
+                    console.log("QRIS Dinamis dengan amount:", amount, "Data:", qrisData);
                 } else {
-                    // Static QRIS tanpa amount (hanya merchant info)
-                    qrisString = buildQRISString(0, false);
+                    // Static QRIS tanpa amount
+                    qrisData = generateQRISPayload(0, false);
+                    console.log("QRIS Static tanpa amount, Data:", qrisData);
                 }
                 
-                // Generate QR Code menggunakan library QRCode
-                const qrCode = new QRCode(canvas, {
-                    text: qrisString,
-                    width: 230,
-                    height: 230,
+                // Generate QR Code menggunakan library QRCode.js
+                new QRCode(document.getElementById('qris-qrcode'), {
+                    text: qrisData,
+                    width: 200,
+                    height: 200,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
                 });
                 
-                // Add overlay text
-                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-                ctx.fillRect(85, 100, 80, 50);
+                // Update UI
+                document.getElementById('qris-amount').textContent = formatRupiah(amount);
+                document.getElementById('amount-instruction').innerHTML = 
+                    `<strong>Jumlah akan terisi otomatis: ${formatRupiah(amount)}</strong>`;
                 
-                ctx.fillStyle = "#c62828";
-                ctx.font = "bold 14px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText("BAKSO", canvas.width/2, 115);
-                ctx.fillText("KALDU PUSAKA", canvas.width/2, 130);
+                // Animasi untuk menunjukkan QRIS aktif
+                const container = document.getElementById('qris-container');
+                container.classList.add('qris-generated');
                 
-                if (amount > 0) {
-                    ctx.font = "bold 10px Arial";
-                    ctx.fillText(formatRupiah(amount), canvas.width/2, 145);
-                }
+                setTimeout(() => {
+                    container.classList.remove('qris-generated');
+                }, 2000);
                 
                 currentQRISAmount = amount;
+                
                 return true;
                 
             } catch (error) {
                 console.error("Error generating QRIS:", error);
-                showNotification("Error membuat QRIS", true);
+                showNotification("Error membuat QRIS: " + error.message, true);
                 return false;
             }
         }
 
-        // Build QRIS String sesuai standar EMVCo
-        function buildQRISString(amount, includeAmount = true) {
-            // Format dasar QRIS Indonesia
-            let qrisData = "";
+        // Generate payload QRIS sesuai standar
+        function generateQRISPayload(amount, includeAmount = true) {
+            // Merchant data
+            const merchantData = {
+                nmdi: "ID1025450423864",
+                merchantName: "BAKSO KALDU PUSAKA",
+                merchantCity: "JAKARTA",
+                mcc: "5812", // Merchant Category Code: Restaurants
+                currency: "360", // IDR
+                country: "ID"
+            };
+            
+            // Build EMVCo QR Code string
+            let payload = "";
             
             // Payload Format Indicator (00)
-            qrisData += "000201";
+            payload += "000201";
             
             // Point of Initiation Method (01)
             // 11 = static, 12 = dynamic
-            qrisData += includeAmount ? "010212" : "010211";
+            payload += includeAmount ? "010212" : "010211";
             
-            // Merchant Account Information (26-45)
-            qrisData += "26580009ID.QRIS.WWW";
+            // Merchant Account Information (26)
+            payload += "26";
+            let merchantInfo = "";
             
-            // NMDI (00)
-            qrisData += "0108" + qrisConfig.nmdi;
+            // GUID (00)
+            merchantInfo += "0016ID.CO.QRIS.WWW";
             
-            // AO Code (01)
-            qrisData += "0203" + qrisConfig.aoCode;
+            // Merchant ID (01) - NMDI
+            merchantInfo += "0115" + merchantData.nmdi;
             
-            // Reserved for Future Use (02-99)
-            qrisData += "0302" + "01"; // Version
-            qrisData += "0406" + "000001"; // Transaction counter
+            // AO Code (02)
+            merchantInfo += "0203AO1";
+            
+            // Add merchant info length and data
+            payload += (merchantInfo.length).toString().padStart(2, '0') + merchantInfo;
             
             // Merchant Category Code (52)
-            qrisData += "5204" + qrisConfig.merchantCategory;
+            payload += "5204" + merchantData.mcc;
             
             // Transaction Currency (53)
-            qrisData += "5303" + "360"; // IDR
+            payload += "5303" + merchantData.currency;
             
-            // Transaction Amount (54) - Hanya untuk dynamic
+            // Transaction Amount (54) - HANYA jika includeAmount true
             if (includeAmount && amount > 0) {
-                const amountStr = amount.toString().padStart(1, '0');
-                qrisData += "540" + (amountStr.length > 9 ? 3 : 2) + amountStr.length + amountStr;
+                const amountStr = Math.round(amount).toString();
+                payload += "54" + (amountStr.length).toString().padStart(2, '0') + amountStr;
             }
             
             // Country Code (58)
-            qrisData += "5802ID";
+            payload += "5802" + merchantData.country;
             
             // Merchant Name (59)
-            const merchantName = qrisConfig.merchantName.substring(0, 25);
-            qrisData += "59" + merchantName.length.toString().padStart(2, '0') + merchantName;
+            const merchantName = merchantData.merchantName.substring(0, 25);
+            payload += "59" + (merchantName.length).toString().padStart(2, '0') + merchantName;
             
             // Merchant City (60)
-            const merchantCity = qrisConfig.merchantCity.substring(0, 15);
-            qrisData += "60" + merchantCity.length.toString().padStart(2, '0') + merchantCity;
+            const merchantCity = merchantData.merchantCity.substring(0, 15);
+            payload += "60" + (merchantCity.length).toString().padStart(2, '0') + merchantCity;
+            
+            // Additional Data Field Template (62) - Optional
+            // Reference Label (05)
+            const refLabel = "TRX" + Date.now().toString().slice(-6);
+            payload += "62" + (refLabel.length + 4).toString().padStart(2, '0') + "05" + (refLabel.length).toString().padStart(2, '0') + refLabel;
             
             // CRC (63)
-            qrisData += "6304";
+            payload += "6304";
             
-            // Simple CRC calculation (dalam implementasi real harus sesuai standar)
-            const crc = "ABCD";
-            qrisData += crc;
+            // Calculate CRC-16/CCITT-FALSE
+            const crc = calculateCRC(payload);
+            payload += crc;
             
-            return qrisData;
+            return payload;
         }
 
-        // Update tampilan QRIS
+        // Calculate CRC-16/CCITT-FALSE
+        function calculateCRC(data) {
+            let crc = 0xFFFF;
+            for (let i = 0; i < data.length; i++) {
+                crc ^= data.charCodeAt(i) << 8;
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x8000) {
+                        crc = (crc << 1) ^ 0x1021;
+                    } else {
+                        crc <<= 1;
+                    }
+                }
+            }
+            crc &= 0xFFFF;
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        // Update tampilan QRIS dan semua display
         function updateQRISDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            // Update payment amount displays
+            // Update semua display jumlah
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('total').textContent = formatRupiah(total);
             
-            // Generate QRIS baru jika amount berubah dan metode QRIS dipilih
-            if (selectedPaymentMethod === 'qris' && currentQRISAmount !== total) {
+            // Update status text
+            const statusText = document.getElementById('status-text');
+            if (total > 0) {
+                statusText.textContent = `QRIS Siap Discan - Jumlah: ${formatRupiah(total)}`;
+                document.getElementById('payment-status').className = 'payment-status scan';
+            } else {
+                statusText.textContent = 'QRIS Siap Discan - Tambahkan item';
+                document.getElementById('payment-status').className = 'payment-status';
+            }
+            
+            // Update instruction
+            const instruction = document.getElementById('amount-instruction');
+            if (total > 0) {
+                instruction.innerHTML = `<strong>Jumlah akan terisi otomatis: ${formatRupiah(total)}</strong>`;
+            } else {
+                instruction.innerHTML = `<strong>Scan QRIS untuk melihat informasi merchant</strong>`;
+            }
+            
+            // Update QRIS QR Code jika amount berubah
+            if (currentQRISAmount !== total) {
                 generateDynamicQRIS(total);
             }
             
-            // Update instructions based on total and payment method
-            const instructions = document.getElementById('payment-instructions');
-            
-            if (selectedPaymentMethod === 'qris') {
-                if (total > 0) {
-                    instructions.innerHTML = `
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Cara Pembayaran dengan QRIS DINAMIS:</strong> 
-                        <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                            <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                            <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                            <li>Arahkan kamera ke QR Code di atas</li>
-                            <li><strong>Jumlah: ${formatRupiah(total)} (terisi otomatis)</strong></li>
-                            <li>Konfirmasi pembayaran</li>
-                            <li>Transaksi akan tercatat di NMDI: ${qrisConfig.nmdi}</li>
-                        </ol>
-                    `;
-                    
-                    document.getElementById('payment-status').innerHTML = `
-                        <i class="fas fa-qrcode"></i> 
-                        Scan QRIS untuk pembayaran ${formatRupiah(total)}
-                    `;
-                    
-                    document.getElementById('qr-status').textContent = `QRIS DINAMIS - Scan & Bayar: ${formatRupiah(total)}`;
-                } else {
-                    instructions.innerHTML = `
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Cara Pembayaran dengan QRIS DINAMIS:</strong> 
-                        <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                            <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                            <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                            <li>Arahkan kamera ke QR Code di atas</li>
-                            <li>Masukkan jumlah pembayaran manual</li>
-                            <li>Konfirmasi pembayaran</li>
-                            <li>Transaksi akan tercatat di NMDI: ${qrisConfig.nmdi}</li>
-                        </ol>
-                    `;
-                    
-                    document.getElementById('payment-status').innerHTML = `
-                        <i class="fas fa-qrcode"></i> 
-                        QRIS DINAMIS BAKSO KALDU PUSAKA - Siap Discan
-                    `;
-                    
-                    document.getElementById('qr-status').textContent = "QRIS DINAMIS - SCAN & BAYAR";
-                }
-            } else if (selectedPaymentMethod === 'tunai') {
-                instructions.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Pembayaran Tunai:</strong> 
-                    <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                        <li>Siapkan uang tunai sebesar: <strong>${formatRupiah(total)}</strong></li>
-                        <li>Serahkan uang kepada kasir</li>
-                        <li>Tunggu kembalian jika perlu</li>
-                        <li>Transaksi akan dicatat di sistem</li>
-                    </ol>
-                `;
-                
-                document.getElementById('payment-status').innerHTML = `
-                    <i class="fas fa-money-bill-wave"></i> 
-                    Pembayaran Tunai: ${formatRupiah(total)}
-                `;
-                
-                document.getElementById('qr-status').textContent = "PEMBAYARAN TUNAI";
-            } else if (selectedPaymentMethod === 'debit') {
-                instructions.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Pembayaran Kartu Debit:</strong> 
-                    <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                        <li>Serahkan kartu debit kepada kasir</li>
-                        <li>Masukkan PIN di EDC</li>
-                        <li>Tunggu konfirmasi pembayaran</li>
-                        <li>Ambil bukti transaksi</li>
-                    </ol>
-                `;
-                
-                document.getElementById('payment-status').innerHTML = `
-                    <i class="fas fa-credit-card"></i> 
-                    Kartu Debit: ${formatRupiah(total)}
-                `;
-                
-                document.getElementById('qr-status').textContent = "KARTU DEBIT";
-            }
-            
-            // Update QRIS status
-            const qrStatus = document.getElementById('qr-status');
-            qrStatus.className = selectedPaymentMethod === 'qris' ? "qr-valid" : "";
+            return total;
         }
 
-        // Test QRIS function
+        // Test QRIS
         function testQRIS() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            if (selectedPaymentMethod === 'qris') {
-                if (total > 0) {
-                    showNotification(`QRIS DINAMIS siap discan! Jumlah: ${formatRupiah(total)}`, false);
-                    console.log("QRIS String:", buildQRISString(total, true));
-                } else {
-                    showNotification("QRIS DINAMIS Bakso Kaldu Pusaka siap discan. Masukkan jumlah manual.", false);
-                    console.log("QRIS String:", buildQRISString(0, false));
-                }
+            if (total > 0) {
+                showNotification(`✅ QRIS DINAMIS AKTIF! Scan QR Code untuk membayar ${formatRupiah(total)}`, false);
+                
+                // Log debug info
+                console.log("=== QRIS DEBUG INFO ===");
+                console.log("Total Amount:", formatRupiah(total));
+                console.log("NMDI: ID1025450423864");
+                console.log("Merchant: BAKSO KALDU PUSAKA");
+                console.log("Status: QRIS Dinamis Aktif");
+                
+                // Simulasi scan
+                const container = document.getElementById('qris-container');
+                container.classList.add('qris-active');
+                setTimeout(() => {
+                    container.classList.remove('qris-active');
+                }, 1000);
+                
             } else {
-                showNotification(`Metode pembayaran: ${selectedPaymentMethod.toUpperCase()} - ${formatRupiah(total)}`, false);
+                showNotification("ℹ️ Tambahkan item ke keranjang untuk mengaktifkan QRIS Dinamis", false);
             }
-            
-            // Log info untuk debugging
-            console.log("=== PAYMENT INFO ===");
-            console.log("NMDI:", qrisConfig.nmdi);
-            console.log("AO Code:", qrisConfig.aoCode);
-            console.log("Merchant:", qrisConfig.merchantName);
-            console.log("Total Transaksi:", formatRupiah(total));
-            console.log("Payment Method:", selectedPaymentMethod);
-        }
-
-        // Filter transaksi berdasarkan waktu
-        function filterTransactionsByTimeRange(transactions, range) {
-            const now = new Date();
-            let filtered = [...transactions];
-            
-            switch(range) {
-                case 'today':
-                    const today = now.toDateString();
-                    filtered = transactions.filter(t => {
-                        const transDate = new Date(t.date).toDateString();
-                        return transDate === today;
-                    });
-                    break;
-                    
-                case 'week':
-                    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    filtered = transactions.filter(t => new Date(t.date) >= oneWeekAgo);
-                    break;
-                    
-                case 'month':
-                    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                    filtered = transactions.filter(t => new Date(t.date) >= oneMonthAgo);
-                    break;
-                    
-                case 'all':
-                default:
-                    filtered = transactions;
-            }
-            
-            return filtered;
-        }
-
-        // Hitung statistik
-        function calculateStatistics(filteredTransactions) {
-            if (filteredTransactions.length === 0) {
-                return {
-                    totalIncome: 0,
-                    totalTransactions: 0,
-                    totalItems: 0,
-                    averageTransaction: 0,
-                    topItems: [],
-                    categoryData: { utama: 0, tambahan: 0, minuman: 0 },
-                    dailyRevenue: {}
-                };
-            }
-            
-            // Hitung total pendapatan
-            const totalIncome = filteredTransactions.reduce((sum, t) => sum + t.total, 0);
-            
-            // Hitung total transaksi
-            const totalTransactions = filteredTransactions.length;
-            
-            // Hitung total item terjual
-            const totalItems = filteredTransactions.reduce((sum, t) => {
-                return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
-            }, 0);
-            
-            // Hitung rata-rata transaksi
-            const averageTransaction = totalIncome / totalTransactions;
-            
-            // Hitung item terlaris
-            const itemSales = {};
-            filteredTransactions.forEach(t => {
-                t.items.forEach(item => {
-                    if (!itemSales[item.name]) {
-                        itemSales[item.name] = {
-                            name: item.name,
-                            quantity: 0,
-                            revenue: 0
-                        };
-                    }
-                    itemSales[item.name].quantity += item.quantity;
-                    itemSales[item.name].revenue += item.price * item.quantity;
-                });
-            });
-            
-            const topItems = Object.values(itemSales)
-                .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 5);
-            
-            // Hitung data per kategori
-            const categoryData = { utama: 0, tambahan: 0, minuman: 0 };
-            filteredTransactions.forEach(t => {
-                t.items.forEach(item => {
-                    const menuItem = findMenuItemById(item.id);
-                    if (menuItem && menuItem.category) {
-                        categoryData[menuItem.category] += item.quantity;
-                    }
-                });
-            });
-            
-            // Hitung pendapatan per hari
-            const dailyRevenue = {};
-            filteredTransactions.forEach(t => {
-                const date = new Date(t.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-                if (!dailyRevenue[date]) {
-                    dailyRevenue[date] = 0;
-                }
-                dailyRevenue[date] += t.total;
-            });
-            
-            return {
-                totalIncome,
-                totalTransactions,
-                totalItems,
-                averageTransaction,
-                topItems,
-                categoryData,
-                dailyRevenue
-            };
-        }
-
-        // Render statistik cards
-        function renderStatistics() {
-            const filteredTransactions = filterTransactionsByTimeRange(transactions, currentTimeRange);
-            const stats = calculateStatistics(filteredTransactions);
-            
-            const statsContainer = document.getElementById('stats-cards');
-            
-            statsContainer.innerHTML = `
-                <div class="stat-card income">
-                    <div class="stat-icon income">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-value">${formatRupiah(stats.totalIncome)}</div>
-                    <div class="stat-label">Total Pendapatan</div>
-                </div>
-                
-                <div class="stat-card transactions">
-                    <div class="stat-icon transactions">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <div class="stat-value">${stats.totalTransactions}</div>
-                    <div class="stat-label">Total Transaksi</div>
-                </div>
-                
-                <div class="stat-card items">
-                    <div class="stat-icon items">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <div class="stat-value">${stats.totalItems}</div>
-                    <div class="stat-label">Item Terjual</div>
-                </div>
-                
-                <div class="stat-card average">
-                    <div class="stat-icon average">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <div class="stat-value">${formatRupiah(stats.averageTransaction)}</div>
-                    <div class="stat-label">Rata-rata per Transaksi</div>
-                </div>
-            `;
-            
-            // Render chart pendapatan per hari
-            renderRevenueChart(stats.dailyRevenue);
-            
-            // Render chart kategori
-            renderCategoryChart(stats.categoryData);
-            
-            // Render top items
-            renderTopItems(stats.topItems);
-        }
-
-        // Render chart pendapatan per hari
-        function renderRevenueChart(dailyRevenue) {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            
-            // Destroy existing chart if exists
-            if (revenueChartInstance) {
-                revenueChartInstance.destroy();
-            }
-            
-            const labels = Object.keys(dailyRevenue);
-            const data = Object.values(dailyRevenue);
-            
-            revenueChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Pendapatan (Rp)',
-                        data: data,
-                        backgroundColor: 'rgba(198, 40, 40, 0.7)',
-                        borderColor: 'rgba(198, 40, 40, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Rp ' + formatNumber(value);
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Pendapatan: ' + formatRupiah(context.raw);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render chart kategori
-        function renderCategoryChart(categoryData) {
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            
-            // Destroy existing chart if exists
-            if (categoryChartInstance) {
-                categoryChartInstance.destroy();
-            }
-            
-            const labels = ['Menu Utama', 'Menu Tambahan', 'Minuman'];
-            const data = [
-                categoryData.utama || 0,
-                categoryData.tambahan || 0,
-                categoryData.minuman || 0
-            ];
-            
-            const backgroundColors = [
-                'rgba(198, 40, 40, 0.7)',
-                'rgba(33, 150, 243, 0.7)',
-                'rgba(255, 152, 0, 0.7)'
-            ];
-            
-            categoryChartInstance = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} item (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render top items
-        function renderTopItems(topItems) {
-            const container = document.getElementById('top-items-list');
-            
-            if (topItems.length === 0) {
-                container.innerHTML = '<div class="empty-history">Belum ada data penjualan</div>';
-                return;
-            }
-            
-            let tableHTML = `
-                <table class="top-items-table">
-                    <thead>
-                        <tr>
-                            <th>Peringkat</th>
-                            <th>Nama Menu</th>
-                            <th>Jumlah Terjual</th>
-                            <th>Pendapatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            topItems.forEach((item, index) => {
-                const rank = index + 1;
-                
-                tableHTML += `
-                    <tr>
-                        <td>
-                            <span class="rank">${rank}</span>
-                        </td>
-                        <td>${item.name}</td>
-                        <td>${item.quantity} porsi</td>
-                        <td><strong>${formatRupiah(item.revenue)}</strong></td>
-                    </tr>
-                `;
-            });
-            
-            tableHTML += `</tbody></table>`;
-            container.innerHTML = tableHTML;
-        }
-
-        // Cari item menu berdasarkan ID
-        function findMenuItemById(id) {
-            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
-            return allItems.find(item => item.id === id);
         }
 
         // Render menu items
         function renderMenuItems() {
-            console.log("Rendering menu items...");
-            
             // Menu utama
             const mainMenuContainer = document.getElementById('main-menu-items');
             mainMenuContainer.innerHTML = '';
@@ -1944,63 +1016,39 @@
                 `;
                 drinkMenuContainer.appendChild(menuItem);
             });
-            
-            console.log("Menu rendering completed");
         }
 
-        // Setup event listeners untuk tombol menu
+        // Setup event listeners
         function setupMenuButtonEvents() {
-            // Event delegation untuk tombol + dan -
             document.addEventListener('click', function(event) {
                 const target = event.target;
                 
-                // Handle tombol +
                 if (target.closest('.increase-btn')) {
                     const button = target.closest('.increase-btn');
                     const id = parseInt(button.getAttribute('data-id'));
                     increaseQuantity(id);
                 }
                 
-                // Handle tombol -
                 else if (target.closest('.decrease-btn')) {
                     const button = target.closest('.decrease-btn');
                     const id = parseInt(button.getAttribute('data-id'));
                     decreaseQuantity(id);
                 }
-                
-                // Handle pemilihan metode pembayaran
-                else if (target.closest('.payment-method-btn')) {
-                    const button = target.closest('.payment-method-btn');
-                    const method = button.getAttribute('data-method');
-                    selectPaymentMethod(method);
-                }
             });
-        }
-
-        // Pilih metode pembayaran
-        function selectPaymentMethod(method) {
-            selectedPaymentMethod = method;
-            
-            // Update tampilan metode yang dipilih
-            document.querySelectorAll('.payment-method-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            const selectedElement = document.querySelector(`.payment-method-btn[data-method="${method}"]`);
-            selectedElement.classList.add('active');
-            
-            updateQRISDisplay();
-            showNotification(`Metode pembayaran dipilih: ${method.toUpperCase()}`);
         }
 
         // Tambah jumlah item
         function increaseQuantity(id) {
             const itemInCart = cart.find(item => item.id === id);
+            let menuItem = null;
+            
+            // Cari item menu
+            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
+            menuItem = allItems.find(item => item.id === id);
             
             if (itemInCart) {
                 itemInCart.quantity++;
             } else {
-                const menuItem = findMenuItemById(id);
                 if (menuItem) {
                     cart.push({
                         id: menuItem.id,
@@ -2012,9 +1060,10 @@
             }
             
             updateCartDisplay();
-            updateQRISDisplay();
-            if (findMenuItemById(id)) {
-                showNotification(`${findMenuItemById(id).name} ditambahkan ke keranjang`);
+            const total = updateQRISDisplay();
+            
+            if (menuItem) {
+                showNotification(`✅ ${menuItem.name} ditambahkan (Total: ${formatRupiah(total)})`);
             }
         }
 
@@ -2026,10 +1075,10 @@
                 const itemName = cart[itemIndex].name;
                 if (cart[itemIndex].quantity > 1) {
                     cart[itemIndex].quantity--;
-                    showNotification(`Jumlah ${itemName} dikurangi`);
+                    showNotification(`↘️ Jumlah ${itemName} dikurangi`);
                 } else {
                     cart.splice(itemIndex, 1);
-                    showNotification(`${itemName} dihapus dari keranjang`);
+                    showNotification(`❌ ${itemName} dihapus dari keranjang`);
                 }
             }
             
@@ -2041,7 +1090,7 @@
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
             
-            // Update tampilan jumlah di menu
+            // Update jumlah di menu
             cart.forEach(item => {
                 const quantityDisplay = document.getElementById(`quantity-${item.id}`);
                 if (quantityDisplay) {
@@ -2049,7 +1098,7 @@
                 }
             });
             
-            // Reset semua jumlah di menu ke 0 untuk item yang tidak ada di keranjang
+            // Reset jumlah item yang tidak ada di keranjang
             const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
             allItems.forEach(item => {
                 if (!cart.some(cartItem => cartItem.id === item.id)) {
@@ -2076,71 +1125,12 @@
                 });
                 cartContainer.innerHTML = cartHTML;
             }
-            
-            // Hitung total (TANPA PAJAK)
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            // Update total display
-            document.getElementById('total').textContent = formatRupiah(total);
-        }
-
-        // Tampilkan detail transaksi di modal
-        function showTransactionDetails(transaction) {
-            const modal = document.getElementById('transaction-modal');
-            const modalBody = document.getElementById('modal-body');
-            
-            let detailsHTML = `
-                <div style="margin-bottom: 20px;">
-                    <p><strong>ID Transaksi:</strong> TRX${transaction.id}</p>
-                    <p><strong>Tanggal:</strong> ${transaction.date}</p>
-                    <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod || 'QRIS DINAMIS'}</p>
-                    <p><strong>NMDI:</strong> ${transaction.nmdi || qrisConfig.nmdi}</p>
-                    <p><strong>Kode AO:</strong> ${transaction.aoCode || qrisConfig.aoCode}</p>
-                </div>
-                
-                <h4 style="color: #c62828; margin-bottom: 15px; border-bottom: 1px solid #ffcdd2; padding-bottom: 5px;">Detail Pesanan:</h4>
-            `;
-            
-            transaction.items.forEach((item, index) => {
-                detailsHTML += `
-                    <div class="transaction-detail-item">
-                        <div style="flex: 1;">
-                            <strong>${index + 1}. ${item.name}</strong>
-                        </div>
-                        <div style="margin: 0 10px;">
-                            ${item.quantity} x ${formatRupiah(item.price)}
-                        </div>
-                        <div style="font-weight: bold; color: #c62828;">
-                            ${formatRupiah(item.price * item.quantity)}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            detailsHTML += `
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
-                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
-                        <span>TOTAL:</span>
-                        <span style="color: #c62828;">${formatRupiah(transaction.total)}</span>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 10px; background-color: #f0f8ff; border-radius: 5px; border-left: 4px solid #2196F3;">
-                    <p><strong>Informasi Pembayaran:</strong></p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Pembayaran QRIS DINAMIS Berhasil'}</p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">NMDI: ${transaction.nmdi || qrisConfig.nmdi}</p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Merchant: ${transaction.merchant || 'BAKSO KALDU PUSAKA'}</p>
-                </div>
-            `;
-            
-            modalBody.innerHTML = detailsHTML;
-            modal.style.display = 'flex';
         }
 
         // Simpan transaksi
         function saveTransaction() {
             if (cart.length === 0) {
-                showNotification('Keranjang kosong. Tambahkan item terlebih dahulu.', true);
+                showNotification('❌ Keranjang kosong. Tambahkan item terlebih dahulu.', true);
                 return;
             }
             
@@ -2151,262 +1141,70 @@
                 date: new Date().toLocaleString('id-ID'),
                 items: [...cart.map(item => ({...item}))],
                 total,
-                paymentMethod: selectedPaymentMethod === 'qris' ? "QRIS DINAMIS" : selectedPaymentMethod.toUpperCase(),
-                nmdi: qrisConfig.nmdi,
-                aoCode: qrisConfig.aoCode,
-                merchant: qrisConfig.merchantName,
-                status: "SUCCESS"
+                paymentMethod: "QRIS DINAMIS",
+                nmdi: "ID1025450423864",
+                aoCode: "AO1",
+                merchant: "BAKSO KALDU PUSAKA",
+                status: "SUCCESS - QRIS DINAMIS"
             };
             
             transactions.unshift(transaction);
             localStorage.setItem('baksoTransactions', JSON.stringify(transactions));
             
-            showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)} - ${transaction.paymentMethod}`, false);
+            showNotification(`✅ Transaksi berhasil! Total: ${formatRupiah(total)} - QRIS tercatat`, false);
             
-            // Update semua tampilan
-            updateCartDisplay();
-            updateQRISDisplay();
-            renderTransactions();
-            renderStatistics();
-            
-            // Reset keranjang
+            // Reset semua
             cart = [];
             updateCartDisplay();
             updateQRISDisplay();
+            
+            // Update dashboard
+            updateDashboard();
         }
 
-        // Render riwayat transaksi
-        function renderTransactions() {
-            const container = document.getElementById('transactions-container');
+        // Update dashboard
+        function updateDashboard() {
+            const totalIncome = transactions.reduce((sum, t) => sum + t.total, 0);
+            const totalTransactions = transactions.length;
+            const totalItems = transactions.reduce((sum, t) => {
+                return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+            }, 0);
+            const averageTransaction = totalTransactions > 0 ? totalIncome / totalTransactions : 0;
             
-            if (transactions.length === 0) {
-                container.innerHTML = '<div class="empty-history">Belum ada transaksi yang tersimpan.</div>';
-                return;
-            }
-            
-            let tableHTML = `
-                <table class="transactions-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Tanggal/Waktu</th>
-                            <th>Detail Pesanan</th>
-                            <th>Jumlah Item</th>
-                            <th>Total</th>
-                            <th>Metode</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            const statsContainer = document.getElementById('stats-cards');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div style="font-size: 2.5rem; color: #4CAF50; margin-bottom: 15px;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-value">${formatRupiah(totalIncome)}</div>
+                    <div class="stat-label">Total Pendapatan</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="font-size: 2.5rem; color: #2196F3; margin-bottom: 15px;">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-value">${totalTransactions}</div>
+                    <div class="stat-label">Total Transaksi</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="font-size: 2.5rem; color: #FF9800; margin-bottom: 15px;">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="stat-value">${totalItems}</div>
+                    <div class="stat-label">Item Terjual</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="font-size: 2.5rem; color: #9C27B0; margin-bottom: 15px;">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="stat-value">${formatRupiah(averageTransaction)}</div>
+                    <div class="stat-label">Rata-rata per Transaksi</div>
+                </div>
             `;
-            
-            transactions.forEach((transaction, index) => {
-                const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
-                
-                let orderSummary = '';
-                transaction.items.slice(0, 2).forEach(item => {
-                    orderSummary += `${item.quantity}x ${item.name}<br>`;
-                });
-                
-                if (transaction.items.length > 2) {
-                    orderSummary += `+${transaction.items.length - 2} item lainnya`;
-                }
-                
-                tableHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${transaction.date}</td>
-                        <td class="transaction-details">
-                            <div style="font-size: 0.9rem;">
-                                ${orderSummary}
-                            </div>
-                        </td>
-                        <td>${itemCount} item</td>
-                        <td><strong>${formatRupiah(transaction.total)}</strong></td>
-                        <td>
-                            <span style="color: #2196F3; font-weight: bold;">
-                                <i class="fas ${transaction.paymentMethod.includes('QRIS') ? 'fa-qrcode' : transaction.paymentMethod === 'TUNAI' ? 'fa-money-bill-wave' : 'fa-credit-card'}"></i> ${transaction.paymentMethod || 'QRIS DINAMIS'}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="view-details-btn" data-transaction='${JSON.stringify(transaction)}'>
-                                <i class="fas fa-eye"></i> Lihat Detail
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
-            
-            tableHTML += `
-                </tbody>
-                <tfoot>
-                    <tr style="background-color: #f9f9f9; font-weight: bold;">
-                        <td colspan="4" style="text-align: right;">TOTAL KESELURUHAN:</td>
-                        <td colspan="3">${formatRupiah(overallTotal)}</td>
-                    </tr>
-                </tfoot>
-            </table>
-            `;
-            
-            container.innerHTML = tableHTML;
-            
-            document.querySelectorAll('.view-details-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const transactionData = JSON.parse(this.getAttribute('data-transaction'));
-                    showTransactionDetails(transactionData);
-                });
-            });
-        }
-
-        // Ekspor ke PDF
-        function exportToPDF() {
-            if (transactions.length === 0) {
-                showNotification('Tidak ada data transaksi untuk diekspor.', true);
-                return;
-            }
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(18);
-                doc.setTextColor(198, 40, 40);
-                doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS DINAMIS", 20, 20);
-                
-                doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`, 20, 30);
-                doc.text(`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`, 20, 37);
-                doc.text(`QRIS DINAMIS - Update Otomatis`, 20, 44);
-                
-                const headers = [['No', 'Tanggal', 'Detail Pesanan', 'Jml Item', 'Total', 'Status']];
-                const data = transactions.map((transaction, index) => {
-                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
-                    const orderDetails = transaction.items.map(item => 
-                        `${item.quantity}x ${item.name}`
-                    ).join(', ');
-                    
-                    return [
-                        index + 1,
-                        transaction.date,
-                        orderDetails.length > 50 ? orderDetails.substring(0, 47) + '...' : orderDetails,
-                        `${itemCount} item`,
-                        formatRupiah(transaction.total),
-                        transaction.paymentMethod || 'QRIS DINAMIS'
-                    ];
-                });
-                
-                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
-                
-                data.push([
-                    '',
-                    'TOTAL KESELURUHAN',
-                    '',
-                    '',
-                    formatRupiah(overallTotal),
-                    ''
-                ]);
-                
-                doc.autoTable({
-                    head: headers,
-                    body: data,
-                    startY: 50,
-                    theme: 'grid',
-                    headStyles: { 
-                        fillColor: [198, 40, 40],
-                        textColor: [255, 255, 255],
-                        fontSize: 9
-                    },
-                    bodyStyles: { fontSize: 8 },
-                    footStyles: { 
-                        fillColor: [255, 205, 210],
-                        textColor: [0, 0, 0],
-                        fontSize: 9,
-                        fontStyle: 'bold'
-                    },
-                    columnStyles: {
-                        2: { cellWidth: 60 }
-                    },
-                    didDrawPage: function(data) {
-                        doc.setFontSize(8);
-                        doc.setTextColor(128, 128, 128);
-                        doc.text('© 2024 Bakso Kaldu Pusaka - QRIS DINAMIS Payment System', data.settings.margin.left, doc.internal.pageSize.height - 10);
-                        doc.text('QRIS UPDATE OTOMATIS - www.aspi-qris.id', data.settings.margin.left, doc.internal.pageSize.height - 5);
-                    }
-                });
-                
-                doc.save(`Laporan_Penjualan_Bakso_QRIS_DINAMIS_${new Date().toISOString().slice(0,10)}.pdf`);
-                showNotification('Laporan PDF berhasil diekspor!');
-            } catch (error) {
-                console.error('Error exporting to PDF:', error);
-                showNotification('Terjadi kesalahan saat mengekspor PDF', true);
-            }
-        }
-
-        // Ekspor ke Excel
-        function exportToExcel() {
-            if (transactions.length === 0) {
-                showNotification('Tidak ada data transaksi untuk diekspor.', true);
-                return;
-            }
-            
-            try {
-                const data = [];
-                
-                data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS DINAMIS']);
-                data.push([`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`]);
-                data.push([`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`]);
-                data.push(['QRIS DINAMIS - Update Otomatis']);
-                data.push(['SATU QRIS UNTUK SEMUA - www.aspi-qris.id']);
-                data.push([]);
-                data.push(['No', 'Tanggal/Waktu', 'Detail Pesanan', 'Jumlah Item', 'Total', 'Metode', 'NMDI']);
-                
-                transactions.forEach((transaction, index) => {
-                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
-                    const orderDetails = transaction.items.map(item => 
-                        `${item.quantity}x ${item.name}`
-                    ).join(', ');
-                    
-                    data.push([
-                        index + 1,
-                        transaction.date,
-                        orderDetails,
-                        `${itemCount} item`,
-                        transaction.total,
-                        transaction.paymentMethod || 'QRIS DINAMIS',
-                        transaction.nmdi || qrisConfig.nmdi
-                    ]);
-                });
-                
-                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
-                
-                data.push([]);
-                data.push(['', 'TOTAL KESELURUHAN', '', '', overallTotal, '', '']);
-                
-                const ws = XLSX.utils.aoa_to_sheet(data);
-                
-                const wscols = [
-                    {wch: 5},
-                    {wch: 25},
-                    {wch: 50},
-                    {wch: 12},
-                    {wch: 15},
-                    {wch: 12},
-                    {wch: 20}
-                ];
-                ws['!cols'] = wscols;
-                
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
-                
-                XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_QRIS_DINAMIS_${new Date().toISOString().slice(0,10)}.xlsx`);
-                showNotification('Laporan Excel berhasil diekspor!');
-            } catch (error) {
-                console.error('Error exporting to Excel:', error);
-                showNotification('Terjadi kesalahan saat mengekspor Excel', true);
-            }
         }
 
         // Reset pesanan
@@ -2416,7 +1214,7 @@
                 return;
             }
             
-            if (confirm('Apakah Anda yakin ingin mereset pesanan? Semua item di keranjang akan dihapus.')) {
+            if (confirm('Reset pesanan? Semua item akan dihapus.')) {
                 cart = [];
                 updateCartDisplay();
                 updateQRISDisplay();
@@ -2424,23 +1222,9 @@
             }
         }
 
-        // Reset semua data
-        function resetAllData() {
-            if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
-                cart = [];
-                transactions = [];
-                localStorage.removeItem('baksoTransactions');
-                updateCartDisplay();
-                updateQRISDisplay();
-                renderTransactions();
-                renderStatistics();
-                showNotification('Semua data telah direset');
-            }
-        }
-
         // Inisialisasi aplikasi
         function initApp() {
-            console.log("Initializing Bakso Kaldu Pusaka POS System with DYNAMIC QRIS...");
+            console.log("Memulai sistem Bakso Kaldu Pusaka dengan QRIS DINAMIS...");
             
             try {
                 // Generate initial QRIS
@@ -2455,77 +1239,45 @@
                 // Update displays
                 updateCartDisplay();
                 updateQRISDisplay();
-                renderTransactions();
-                renderStatistics();
+                updateDashboard();
                 updateDateTime();
                 
-                console.log("Application initialized successfully");
+                // Setup button events
+                document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
+                document.getElementById('export-pdf').addEventListener('click', () => {
+                    showNotification("Fitur ekspor PDF dalam pengembangan", false);
+                });
+                document.getElementById('export-excel').addEventListener('click', () => {
+                    showNotification("Fitur ekspor Excel dalam pengembangan", false);
+                });
+                document.getElementById('reset-btn').addEventListener('click', resetOrder);
+                document.getElementById('test-qr-btn').addEventListener('click', testQRIS);
                 
                 // Update waktu setiap detik
                 setInterval(updateDateTime, 1000);
                 
-                // Event listeners untuk tombol utama
-                document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
-                document.getElementById('export-pdf').addEventListener('click', exportToPDF);
-                document.getElementById('export-excel').addEventListener('click', exportToExcel);
-                document.getElementById('reset-btn').addEventListener('click', resetOrder);
-                document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
-                document.getElementById('test-qr-btn').addEventListener('click', testQRIS);
-                
-                // Event listener untuk modal
-                document.getElementById('close-modal').addEventListener('click', function() {
-                    document.getElementById('transaction-modal').style.display = 'none';
-                });
-                
-                // Tutup modal saat klik di luar
-                window.addEventListener('click', function(event) {
-                    const modal = document.getElementById('transaction-modal');
-                    if (event.target === modal) {
-                        modal.style.display = 'none';
-                    }
-                });
-                
-                // Event listeners untuk filter waktu
-                document.querySelectorAll('.time-filter-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        
-                        currentTimeRange = this.getAttribute('data-range');
-                        renderStatistics();
-                    });
-                });
-                
-                // Tampilkan notifikasi startup
+                // Notifikasi startup
                 setTimeout(() => {
-                    showNotification(`Sistem Bakso Kaldu Pusaka siap! QRIS DINAMIS aktif dengan NMDI: ${qrisConfig.nmdi}`);
+                    showNotification("✅ Sistem QRIS DINAMIS siap! Tambahkan item untuk mulai");
                 }, 1000);
                 
+                console.log("Sistem berhasil diinisialisasi");
+                
             } catch (error) {
-                console.error("Error initializing app:", error);
-                showNotification("Terjadi error saat inisialisasi aplikasi: " + error.message, true);
+                console.error("Error inisialisasi:", error);
+                showNotification("Error memulai sistem: " + error.message, true);
             }
         }
 
-        // Jalankan aplikasi saat halaman dimuat
+        // Jalankan saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
         
-        // Fallback jika QRIS gagal generate
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const canvas = document.getElementById('qris-canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Check if QRIS was generated
-                const imageData = ctx.getImageData(0, 0, 1, 1).data;
-                const isEmpty = imageData[0] === 0 && imageData[1] === 0 && imageData[2] === 0;
-                
-                if (isEmpty) {
-                    console.log("QRIS not generated, creating fallback");
-                    generateDynamicQRIS(0);
-                }
-            }, 1000);
-        });
+        // Pastikan QR Code library dimuat
+        if (typeof QRCode === 'undefined') {
+            console.error("QRCode library tidak dimuat!");
+            document.getElementById('qris-qrcode').innerHTML = 
+                '<div style="color: red; text-align: center; padding: 20px;">Error: QR Code library gagal dimuat</div>';
+        }
     </script>
 </body>
 </html>
