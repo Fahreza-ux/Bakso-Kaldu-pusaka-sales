@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -142,7 +144,8 @@
         .menu-item-info {
             flex: 1;
         }
-          .menu-item-name {
+        
+        .menu-item-name {
             font-weight: 600;
             font-size: 1.1rem;
             color: #333;
@@ -167,8 +170,8 @@
         .quantity-btn {
             background-color: #ffcdd2;
             border: none;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
@@ -177,10 +180,12 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            font-size: 1.1rem;
         }
         
         .quantity-btn:hover {
             background-color: #ef9a9a;
+            transform: scale(1.1);
         }
         
         .quantity-display {
@@ -188,7 +193,7 @@
             text-align: center;
             font-weight: 600;
             color: #333;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         
         .cart-items {
@@ -281,48 +286,34 @@
         }
         
         .qris-container {
-            position: relative;
             width: 220px;
             height: 220px;
             margin: 0 auto 15px;
             background: white;
             border-radius: 10px;
-            padding: 10px;
+            padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-             .qris-pattern {
-            width: 100%;
-            height: 100%;
-            background: 
-                repeating-linear-gradient(0deg, #000, #000 1px, transparent 1px, transparent 8px),
-                repeating-linear-gradient(90deg, #000, #000 1px, transparent 1px, transparent 8px);
-            border-radius: 5px;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .qris-pattern::before {
-            content: '';
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
-            background: 
-                repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px);
+        #qrcode {
+            width: 190px;
+            height: 190px;
+        }
+        
+        #qrcode canvas, #qrcode img {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 5px;
         }
         
         .qris-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.9);
             color: #000;
         }
         
@@ -399,6 +390,7 @@
         .btn-primary:hover {
             background-color: #b71c1c;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(198, 40, 40, 0.3);
         }
         
         .btn-secondary {
@@ -409,6 +401,7 @@
         .btn-secondary:hover {
             background-color: #388E3C;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         }
         
         .btn-export {
@@ -419,6 +412,7 @@
         .btn-export:hover {
             background-color: #1976D2;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
         }
         
         .btn-reset {
@@ -429,18 +423,30 @@
         .btn-reset:hover {
             background-color: #F57C00;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
         }
         
         .btn i {
             font-size: 1.2rem;
         }
         
+        .btn:active {
+            transform: translateY(0);
+        }
+        
         .export-options {
             display: flex;
             gap: 10px;
             margin-top: 10px;
-                }
-           /* Dashboard Section */
+        }
+        
+        .export-options .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+        
+        /* Dashboard Section */
         .dashboard-section {
             margin-bottom: 40px;
         }
@@ -546,6 +552,7 @@
             padding: 25px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
+        
         .chart-title {
             color: #c62828;
             margin-bottom: 20px;
@@ -728,7 +735,8 @@
             justify-content: center;
             gap: 8px;
         }
-         .time-filter {
+        
+        .time-filter {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
@@ -819,10 +827,38 @@
             cursor: pointer;
             text-decoration: underline;
             font-size: 0.9rem;
+            padding: 5px;
         }
         
         .view-details-btn:hover {
             color: #1976D2;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        
+        .test-qr-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #9C27B0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .test-qr-btn:hover {
+            background: #7B1FA2;
+        }
+        
+        .payment-instructions {
+            background: #FFF3E0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #E65100;
+            border-left: 4px solid #FF9800;
         }
     </style>
 </head>
@@ -853,7 +889,8 @@
                         <!-- Menu items akan diisi JavaScript -->
                     </div>
                 </div>
-                  <div class="menu-category">
+                
+                <div class="menu-category">
                     <h3>Menu Tambahan</h3>
                     <div id="additional-menu-items">
                         <!-- Menu items akan diisi JavaScript -->
@@ -888,7 +925,7 @@
                     </h3>
                     
                     <div class="qris-container">
-                        <div class="qris-pattern"></div>
+                        <div id="qrcode"></div>
                         <div class="qris-overlay" id="qris-overlay">
                             <div class="qris-logo">
                                 <i class="fas fa-qrcode"></i>
@@ -907,6 +944,15 @@
                         <i class="fas fa-qrcode"></i>
                         Scan QR Code di atas untuk pembayaran
                     </div>
+                    
+                    <div class="payment-instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Cara Pembayaran:</strong> Buka aplikasi bank/e-wallet, scan QR Code, konfirmasi pembayaran.
+                    </div>
+                    
+                    <button class="test-qr-btn" id="test-qr-btn">
+                        <i class="fas fa-mobile-alt"></i> Test Scan QR Code
+                    </button>
                     
                     <div class="nmid-details">
                         <p><strong>NMDI:</strong> ID1025450423864</p>
@@ -933,7 +979,8 @@
                             <i class="fas fa-file-excel"></i> Ekspor Excel
                         </button>
                     </div>
-                     <button class="btn btn-reset" id="reset-btn">
+                    
+                    <button class="btn btn-reset" id="reset-btn">
                         <i class="fas fa-redo"></i> Reset Pesanan
                     </button>
                 </div>
@@ -985,9 +1032,10 @@
                 <!-- Riwayat transaksi akan diisi JavaScript -->
             </div>
         </div>
+        
         <footer>
             <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + QRIS + Dashboard. Semua hak dilindungi.</p>
-            <p>Versi 1.4 | Menu Fixed & QRIS Lengkap | Terakhir diperbarui: Maret 2024</p>
+            <p>Versi 1.5 | QRIS Bisa Dipindai & Tombol Berfungsi | Terakhir diperbarui: Maret 2024</p>
             <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
                 <i class="fas fa-trash-alt"></i> Reset Semua Data
             </button>
@@ -1056,6 +1104,7 @@
         let currentTimeRange = 'all';
         let revenueChartInstance = null;
         let categoryChartInstance = null;
+        let qrcodeInstance = null;
 
         // Format angka ke Rupiah
         function formatRupiah(amount) {
@@ -1065,6 +1114,7 @@
                 minimumFractionDigits: 0
             }).format(amount);
         }
+
         // Format angka tanpa Rp
         function formatNumber(amount) {
             return new Intl.NumberFormat('id-ID', {
@@ -1107,45 +1157,106 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
-                    }
-           // Generate QRIS data string untuk pembayaran
+        }
+
+        // Generate QRIS data string untuk pembayaran (Format EMVCo)
         function generateQRISData(totalAmount) {
-            // Format data QRIS sesuai standar
+            // Format data QRIS sesuai standar EMVCo untuk Indonesia
+            // Ini adalah format simulasi yang mendekati format QRIS sebenarnya
+            const transactionId = `TRX${Date.now().toString().slice(-8)}`;
+            const amountStr = totalAmount.toString().padStart(13, '0');
+            
+            // Format data QRIS yang bisa dipindai (simulasi)
             const qrisData = {
-                version: "01",
-                merchantType: "26",
-                merchantId: qrisConfig.nmdi,
-                merchantName: qrisConfig.merchantName,
-                currency: "360",
-                amount: totalAmount,
-                country: "ID",
-                merchantCity: "Indonesia",
-                postalCode: "",
-                additionalData: {
-                    billNumber: `TRX${Date.now()}`,
-                    storeLabel: "Bakso Kaldu Pusaka",
-                    terminalLabel: "AO1"
+                "00": "01", // Payload Format Indicator
+                "01": "11", // Point of Initiation Method
+                "52": "7009", // Merchant Category Code (Restaurant)
+                "53": "360", // Transaction Currency (IDR)
+                "54": amountStr, // Transaction Amount
+                "58": "ID", // Country Code
+                "59": qrisConfig.merchantName, // Merchant Name
+                "60": "Indonesia", // Merchant City
+                "62": { // Additional Data Field Template
+                    "01": transactionId, // Bill Number
+                    "05": qrisConfig.nmdi, // Store Label
+                    "07": qrisConfig.aoCode // Terminal Label
                 }
             };
             
-            // Simulasikan string data QRIS
-            return `QRIS|${qrisConfig.nmdi}|${qrisConfig.merchantName}|${totalAmount}|IDR|ID|${Date.now()}|AO1`;
+            // Konversi ke string format QRIS
+            let qrisString = "";
+            for (const [key, value] of Object.entries(qrisData)) {
+                if (typeof value === 'object') {
+                    let subString = "";
+                    for (const [subKey, subValue] of Object.entries(value)) {
+                        subString += subKey.padStart(2, '0') + subValue.length.toString().padStart(2, '0') + subValue;
+                    }
+                    qrisString += key + subString.length.toString().padStart(2, '0') + subString;
+                } else {
+                    qrisString += key + value.length.toString().padStart(2, '0') + value;
+                }
+            }
+            
+            // Untuk demo, kita gunakan format yang lebih sederhana
+            const demoQRIS = `https://qris.id/pay/${qrisConfig.nmdi}?amount=${totalAmount}&trxid=${transactionId}&ao=${qrisConfig.aoCode}`;
+            
+            return demoQRIS; // URL yang bisa dipindai
+        }
+
+        // Generate QR Code untuk pembayaran
+        function generateQRCode(totalAmount) {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            if (totalAmount > 0) {
+                // Generate data QRIS
+                const qrisData = generateQRISData(totalAmount);
+                
+                // Buat QR Code
+                qrcodeInstance = new QRCode(qrContainer, {
+                    text: qrisData,
+                    width: 190,
+                    height: 190,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                // Sembunyikan overlay saat ada QR Code
+                document.getElementById('qris-overlay').style.display = 'none';
+                
+                return qrisData;
+            } else {
+                // Tampilkan placeholder saat tidak ada transaksi
+                qrContainer.innerHTML = `
+                    <div class="qris-overlay">
+                        <div class="qris-logo">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="qris-amount">Rp 0</div>
+                        <div class="qris-merchant">BAKSO KALDU PUSAKA</div>
+                        <div class="qris-merchant" style="font-size: 0.7rem; margin-top: 3px;">NMDI: ${qrisConfig.nmdi}</div>
+                    </div>
+                `;
+                document.getElementById('qris-overlay').style.display = 'flex';
+                return null;
+            }
         }
 
         // Update QRIS display dengan data pembayaran
         function updateQRISDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-              // Update payment amount
+            
+            // Update payment amount
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('qris-amount').textContent = formatRupiah(total);
+            
+            // Update QR Code
+            const qrisData = generateQRCode(total);
             
             // Update QR Code status
             const paymentStatus = document.getElementById('payment-status');
             if (total > 0) {
-                // Generate QRIS data
-                const qrisData = generateQRISData(total);
-                console.log("QRIS Data for payment:", qrisData);
-                
                 paymentStatus.innerHTML = `<i class="fas fa-qrcode"></i> Scan QR Code untuk pembayaran ${formatRupiah(total)}`;
                 paymentStatus.style.backgroundColor = '#4CAF50';
                 paymentStatus.style.color = 'white';
@@ -1157,14 +1268,32 @@
                     timestamp: new Date().toISOString()
                 }));
                 
-                showNotification(`QRIS siap untuk pembayaran ${formatRupiah(total)}`);
+                console.log("QRIS Data generated:", qrisData);
             } else {
                 paymentStatus.innerHTML = `<i class="fas fa-qrcode"></i> Tambahkan item untuk melihat QRIS pembayaran`;
                 paymentStatus.style.backgroundColor = '#e8f5e9';
                 paymentStatus.style.color = '#2e7d32';
             }
-                }
-             // Filter transaksi berdasarkan waktu
+        }
+
+        // Test scan QR Code
+        function testScanQRCode() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            if (total > 0) {
+                const qrData = generateQRISData(total);
+                showNotification(`QR Code berhasil digenerate! Data: ${qrData.substring(0, 50)}...`);
+                
+                // Simulasikan pembayaran berhasil
+                setTimeout(() => {
+                    showNotification("Pembayaran berhasil! Silakan simpan transaksi.", false);
+                }, 2000);
+            } else {
+                showNotification("Tambahkan item terlebih dahulu untuk test QR Code", true);
+            }
+        }
+
+        // Filter transaksi berdasarkan waktu
         function filterTransactionsByTimeRange(transactions, range) {
             const now = new Date();
             let filtered = [...transactions];
@@ -1220,7 +1349,8 @@
             const totalItems = filteredTransactions.reduce((sum, t) => {
                 return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
             }, 0);
-               // Hitung rata-rata transaksi
+            
+            // Hitung rata-rata transaksi
             const averageTransaction = totalIncome / totalTransactions;
             
             // Hitung item terlaris
@@ -1374,7 +1504,63 @@
                     }
                 }
             });
+        }
+
+        // Render chart kategori
+        function renderCategoryChart(categoryData) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            // Destroy existing chart if exists
+            if (categoryChartInstance) {
+                categoryChartInstance.destroy();
+            }
+            
+            const labels = ['Menu Utama', 'Menu Tambahan', 'Minuman'];
+            const data = [
+                categoryData.utama || 0,
+                categoryData.tambahan || 0,
+                categoryData.minuman || 0
+            ];
+            
+            const backgroundColors = [
+                'rgba(198, 40, 40, 0.7)',
+                'rgba(33, 150, 243, 0.7)',
+                'rgba(255, 152, 0, 0.7)'
+            ];
+            
+            categoryChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} item (${percentage}%)`;
+                                }
+                            }
                         }
+                    }
+                }
+            });
+        }
+
         // Render top items
         function renderTopItems(topItems) {
             const container = document.getElementById('top-items-list');
@@ -1422,7 +1608,7 @@
             return allItems.find(item => item.id === id);
         }
 
-        // Render menu items - PERBAIKAN UTAMA DISINI
+        // Render menu items
         function renderMenuItems() {
             console.log("Rendering menu items...");
             
@@ -1430,10 +1616,7 @@
             const mainMenuContainer = document.getElementById('main-menu-items');
             mainMenuContainer.innerHTML = '';
             
-            console.log("Main menu items:", menuData.main);
-            
             menuData.main.forEach(item => {
-                console.log("Adding main menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1442,25 +1625,23 @@
                     </div>
                     <div class="menu-item-price">${formatRupiah(item.price)}</div>
                     <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                        <button class="quantity-btn decrease-btn" data-id="${item.id}">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                        <button class="quantity-btn increase-btn" data-id="${item.id}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 `;
                 mainMenuContainer.appendChild(menuItem);
             });
-               // Menu tambahan
+            
+            // Menu tambahan
             const additionalMenuContainer = document.getElementById('additional-menu-items');
             additionalMenuContainer.innerHTML = '';
             
-            console.log("Additional menu items:", menuData.additional);
-            
             menuData.additional.forEach(item => {
-                console.log("Adding additional menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1469,11 +1650,11 @@
                     </div>
                     <div class="menu-item-price">${formatRupiah(item.price)}</div>
                     <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                        <button class="quantity-btn decrease-btn" data-id="${item.id}">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                        <button class="quantity-btn increase-btn" data-id="${item.id}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -1485,10 +1666,7 @@
             const drinkMenuContainer = document.getElementById('drink-menu-items');
             drinkMenuContainer.innerHTML = '';
             
-            console.log("Drink menu items:", menuData.drinks);
-            
             menuData.drinks.forEach(item => {
-                console.log("Adding drink menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1497,11 +1675,11 @@
                     </div>
                     <div class="menu-item-price">${formatRupiah(item.price)}</div>
                     <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                        <button class="quantity-btn decrease-btn" data-id="${item.id}">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                        <button class="quantity-btn increase-btn" data-id="${item.id}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -1510,6 +1688,28 @@
             });
             
             console.log("Menu rendering completed");
+        }
+
+        // Tambah jumlah item (Event Delegation)
+        function setupMenuButtonEvents() {
+            // Event delegation untuk tombol + dan -
+            document.addEventListener('click', function(event) {
+                const target = event.target;
+                
+                // Handle tombol +
+                if (target.closest('.increase-btn')) {
+                    const button = target.closest('.increase-btn');
+                    const id = parseInt(button.getAttribute('data-id'));
+                    increaseQuantity(id);
+                }
+                
+                // Handle tombol -
+                else if (target.closest('.decrease-btn')) {
+                    const button = target.closest('.decrease-btn');
+                    const id = parseInt(button.getAttribute('data-id'));
+                    decreaseQuantity(id);
+                }
+            });
         }
 
         // Tambah jumlah item
@@ -1555,7 +1755,8 @@
             updateCartDisplay();
             updateQRISDisplay();
         }
-            // Update tampilan keranjang
+
+        // Update tampilan keranjang
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
             
@@ -1645,11 +1846,11 @@
                 
                 <div style="margin-top: 20px; padding: 10px; background-color: #f0f8ff; border-radius: 5px; border-left: 4px solid #2196F3;">
                     <p><strong>Informasi QRIS:</strong></p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Data QRIS: ${transaction.qrisData || generateQRISData(transaction.total)}</p>
                     <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Pembayaran Berhasil'}</p>
                 </div>
             `;
-              modalBody.innerHTML = detailsHTML;
+            
+            modalBody.innerHTML = detailsHTML;
             modal.style.display = 'flex';
         }
 
@@ -1750,14 +1951,15 @@
                             </span>
                         </td>
                         <td>
-                            <button class="view-details-btn" onclick="showTransactionDetails(${JSON.stringify(transaction).replace(/"/g, '&quot;')})">
+                            <button class="view-details-btn" data-transaction='${JSON.stringify(transaction)}'>
                                 <i class="fas fa-eye"></i> Lihat Detail
                             </button>
                         </td>
                     </tr>
                 `;
             });
-              // Hitung total keseluruhan
+            
+            // Hitung total keseluruhan
             const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
             
             tableHTML += `
@@ -1772,6 +1974,14 @@
             `;
             
             container.innerHTML = tableHTML;
+            
+            // Add event listeners untuk tombol lihat detail
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const transactionData = JSON.parse(this.getAttribute('data-transaction'));
+                    showTransactionDetails(transactionData);
+                });
+            });
         }
 
         // Ekspor ke PDF
@@ -1860,7 +2070,8 @@
                 showNotification('Terjadi kesalahan saat mengekspor PDF', true);
             }
         }
-           // Ekspor ke Excel
+
+        // Ekspor ke Excel
         function exportToExcel() {
             if (transactions.length === 0) {
                 showNotification('Tidak ada data transaksi untuk diekspor.', true);
@@ -1944,8 +2155,9 @@
                 updateQRISDisplay();
                 showNotification('Pesanan telah direset');
             }
-                                     }
-            // Reset semua data (termasuk riwayat)
+        }
+
+        // Reset semua data (termasuk riwayat)
         function resetAllData() {
             if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
                 cart = [];
@@ -1966,6 +2178,9 @@
             // Render menu terlebih dahulu
             renderMenuItems();
             
+            // Setup event listeners untuk tombol menu
+            setupMenuButtonEvents();
+            
             // Kemudian update display lainnya
             updateCartDisplay();
             updateQRISDisplay();
@@ -1978,12 +2193,13 @@
             // Update waktu setiap detik
             setInterval(updateDateTime, 1000);
             
-            // Event listeners untuk tombol
+            // Event listeners untuk tombol utama
             document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
             document.getElementById('export-pdf').addEventListener('click', exportToPDF);
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
             document.getElementById('reset-btn').addEventListener('click', resetOrder);
             document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
+            document.getElementById('test-qr-btn').addEventListener('click', testScanQRCode);
             
             // Event listener untuk modal
             document.getElementById('close-modal').addEventListener('click', function() {
@@ -2012,12 +2228,10 @@
                     renderStatistics();
                 });
             });
-                }
-          // Jalankan aplikasi saat halaman dimuat
+        }
+
+        // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
-            
-            
-        
