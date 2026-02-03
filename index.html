@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bakso Kaldu Pusaka - Sistem Penjualan + QRIS ASLI + Dashboard</title>
+    <title>Bakso Kaldu Pusaka - Sistem Penjualan + Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -62,7 +62,7 @@
             opacity: 0.9;
         }
         
-        .nmid-info {
+        .payment-info {
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 5px;
@@ -265,7 +265,7 @@
             margin-top: 10px;
         }
         
-        .qris-section {
+        .payment-section {
             background: #f0f8ff;
             border-radius: 10px;
             padding: 20px;
@@ -274,7 +274,7 @@
             text-align: center;
         }
         
-        .qris-title {
+        .payment-title {
             color: #2196F3;
             margin-bottom: 15px;
             display: flex;
@@ -283,63 +283,41 @@
             gap: 10px;
         }
         
-        .qris-container {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 15px;
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .payment-methods {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            margin-top: 20px;
         }
         
-        #qris-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 5px;
-        }
-        
-        .qris-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .payment-method {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            color: #000;
-            border-radius: 5px;
-            display: none;
+            gap: 5px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 120px;
+            transition: transform 0.2s;
         }
         
-        .qris-logo {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+        .payment-method:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .payment-method i {
+            font-size: 2rem;
             color: #2196F3;
         }
         
-        .qris-amount {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #c62828;
-            margin: 5px 0;
-        }
-        
-        .qris-merchant {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-            text-align: center;
-            padding: 0 5px;
+        .payment-method-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
         }
         
         .payment-amount {
@@ -353,23 +331,17 @@
             border: 2px solid #c62828;
         }
         
-        .nmid-details {
-            font-size: 0.9rem;
-            color: #666;
+        .payment-status {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 8px 15px;
+            border-radius: 5px;
             margin-top: 10px;
-            background: white;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .qris-info {
-            background: #e3f2fd;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #1976D2;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .action-buttons {
@@ -733,19 +705,6 @@
             background-color: #f44336;
         }
         
-        .payment-status {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 8px 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
         .time-filter {
             display: flex;
             gap: 10px;
@@ -846,21 +805,6 @@
             border-radius: 3px;
         }
         
-        .test-qr-btn {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: #9C27B0;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        
-        .test-qr-btn:hover {
-            background: #7B1FA2;
-        }
-        
         .payment-instructions {
             background: #FFF3E0;
             padding: 10px;
@@ -869,59 +813,6 @@
             font-size: 0.8rem;
             color: #E65100;
             border-left: 4px solid #FF9800;
-        }
-        
-        .scan-test {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border: 1px dashed #6c757d;
-        }
-        
-        .qr-valid {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .qr-invalid {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .qris-asli-badge {
-            background: linear-gradient(135deg, #FF9800, #FF5722);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 10px;
-            display: inline-block;
-        }
-        
-        .qris-image-container {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 5px;
-            position: relative;
-        }
-        
-        .qris-scan-area {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-            pointer-events: none;
         }
         
         .loading {
@@ -939,13 +830,11 @@
             100% { transform: rotate(360deg); }
         }
         
-        .image-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #666;
+        .cash-payment {
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
             font-size: 0.9rem;
         }
     </style>
@@ -957,12 +846,12 @@
                 <i class="fas fa-utensils"></i>
                 <div>
                     <h1>BAKSO KALDU PUSAKA</h1>
-                    <p class="subtitle">Sistem Penjualan + QRIS ASLI + Dashboard Statistik</p>
+                    <p class="subtitle">Sistem Penjualan + Dashboard Statistik</p>
                 </div>
             </div>
-            <div class="nmid-info">
-                <p><i class="fas fa-qrcode"></i> NMDI: ID1025450423864 | AO1 - QRIS ASLI</p>
-                <p>Satu QRIS Untuk Semua - Valid untuk Pembayaran Nyata</p>
+            <div class="payment-info">
+                <p><i class="fas fa-cash-register"></i> Sistem Penjualan Tunai & Non-Tunai</p>
+                <p>Pembayaran tunai dan digital diterima</p>
             </div>
             <p class="date-time" id="currentDateTime">Minggu, 3 Maret 2024 10:30:15</p>
         </header>
@@ -1007,74 +896,58 @@
                     </div>
                 </div>
                 
-                <div class="qris-section">
-                    <h3 class="qris-title">
-                        <i class="fas fa-qrcode"></i> PEMBAYARAN QRIS ASLI
+                <div class="payment-section">
+                    <h3 class="payment-title">
+                        <i class="fas fa-credit-card"></i> METODE PEMBAYARAN
                     </h3>
-                    
-                    <div class="qris-asli-badge">
-                        <i class="fas fa-check-circle"></i> QRIS RESMI BAKSO KALDU PUSAKA
-                    </div>
-                    
-                    <div class="qris-container">
-                        <!-- QRIS ASLI dari link https://ibb.co.com/cSCS46MK -->
-                        <div class="qris-image-container">
-                            <img id="qris-image" 
-                                 src="https://i.ibb.co/cSCS46MK/Whats-App-Image-2026-02-03-at-18-42-09.jpg" 
-                                 alt="QRIS Bakso Kaldu Pusaka"
-                                 onload="showNotification('QRIS ASLI berhasil dimuat!', false)"
-                                 onerror="handleQRISError()">
-                            <div class="qris-scan-area"></div>
-                        </div>
-                        <div class="qris-overlay" id="qris-overlay">
-                            <div class="image-loading">
-                                <div class="loading"></div>
-                                <p>Memuat QRIS...</p>
-                            </div>
-                        </div>
-                    </div>
                     
                     <div class="payment-amount" id="payment-amount">
                         Rp 0
                     </div>
                     
                     <div class="payment-status" id="payment-status">
-                        <i class="fas fa-qrcode"></i>
-                        Scan QRIS di atas untuk pembayaran
+                        <i class="fas fa-cash-register"></i>
+                        Pilih metode pembayaran
+                    </div>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-method" data-method="tunai">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span class="payment-method-name">TUNAI</span>
+                        </div>
+                        <div class="payment-method" data-method="debit">
+                            <i class="fas fa-credit-card"></i>
+                            <span class="payment-method-name">KARTU DEBIT</span>
+                        </div>
+                        <div class="payment-method" data-method="ovo">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span class="payment-method-name">OVO</span>
+                        </div>
+                        <div class="payment-method" data-method="dana">
+                            <i class="fas fa-wallet"></i>
+                            <span class="payment-method-name">DANA</span>
+                        </div>
+                        <div class="payment-method" data-method="gopay">
+                            <i class="fab fa-google-pay"></i>
+                            <span class="payment-method-name">GOPAY</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cash-payment" id="cash-payment-instructions" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Pembayaran Tunai:</strong> Terima kasih atas pembayaran tunai Anda. Mohon siapkan uang pas sebesar: 
+                        <strong id="cash-amount">Rp 0</strong>
                     </div>
                     
                     <div class="payment-instructions" id="payment-instructions">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Cara Pembayaran dengan QRIS ASLI:</strong> 
+                        <strong>Petunjuk Pembayaran:</strong> 
                         <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                            <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                            <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                            <li>Arahkan kamera ke QR Code di atas</li>
-                            <li><strong>MASUKKAN JUMLAH: Rp 0 (isi jumlah manual)</strong></li>
-                            <li>Konfirmasi pembayaran</li>
-                            <li>Transaksi akan tercatat di NMDI: ID1025450423864</li>
+                            <li>Pilih metode pembayaran di atas</li>
+                            <li>Klik "Simpan Transaksi" untuk menyelesaikan</li>
+                            <li>Untuk pembayaran tunai, siapkan uang pas</li>
+                            <li>Untuk pembayaran digital, lakukan transaksi sesuai aplikasi</li>
                         </ol>
-                    </div>
-                    
-                    <div class="scan-test">
-                        <button class="test-qr-btn" id="test-qr-btn">
-                            <i class="fas fa-mobile-alt"></i> Test QRIS
-                        </button>
-                        <span id="qr-status" class="qr-valid">QRIS ASLI - SCAN & BAYAR</span>
-                    </div>
-                    
-                    <div class="nmid-details">
-                        <p><i class="fas fa-id-card"></i> <strong>NMDI:</strong> ID1025450423864</p>
-                        <p><i class="fas fa-code"></i> <strong>Kode AO:</strong> AO1</p>
-                        <p><i class="fas fa-store"></i> <strong>Merchant:</strong> BAKSO KALDU PUSAKA</p>
-                        <p><i class="fas fa-check-circle"></i> <strong>Status:</strong> QRIS ASLI - VALID</p>
-                    </div>
-                    
-                    <div class="qris-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>SATU QRIS UNTUK SEMUA - QRIS ASLI</strong><br>
-                        Cek aplikasi penyelenggara di: www.aspi-qris.id<br>
-                        <small>QRIS ini dapat discan oleh semua bank/e-wallet di Indonesia</small>
                     </div>
                 </div>
                 
@@ -1146,8 +1019,8 @@
         </div>
         
         <footer>
-            <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + QRIS ASLI + Dashboard. Semua hak dilindungi.</p>
-            <p>Versi 2.3 | QRIS ASLI BERFUNGSI | NMDI: ID1025450423864 | Terakhir diperbarui: Maret 2024</p>
+            <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + Dashboard. Semua hak dilindungi.</p>
+            <p>Versi 2.3 | Pembayaran Tunai & Digital | Terakhir diperbarui: Maret 2024</p>
             <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
                 <i class="fas fa-trash-alt"></i> Reset Semua Data
             </button>
@@ -1201,23 +1074,11 @@
             ]
         };
 
-        // QRIS Configuration - ASLI dari gambar
-        const qrisConfig = {
-            nmdi: "ID1025450423864",
-            aoCode: "AO1", 
-            merchantName: "BAKSO KALDU PUSAKA",
-            merchantCity: "JAKARTA",
-            merchantCategory: "5812",
-            website: "www.aspi-qris.id",
-            paymentMethod: "QRIS",
-            // URL QRIS asli dari ImgBB
-            qrisImageUrl: "https://i.ibb.co/cSCS46MK/Whats-App-Image-2026-02-03-at-18-42-09.jpg"
-        };
-
         // State aplikasi
         let cart = [];
         let transactions = JSON.parse(localStorage.getItem('baksoTransactions')) || [];
         let currentTimeRange = 'all';
+        let selectedPaymentMethod = 'tunai';
         let revenueChartInstance = null;
         let categoryChartInstance = null;
 
@@ -1274,107 +1135,59 @@
             }, 3000);
         }
 
-        // Handle error saat load QRIS image
-        function handleQRISError() {
-            const overlay = document.getElementById('qris-overlay');
-            overlay.style.display = 'flex';
-            overlay.innerHTML = `
-                <div style="text-align: center; color: #666;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff9800; margin-bottom: 10px;"></i>
-                    <p>QRIS tidak dapat dimuat</p>
-                    <p style="font-size: 0.8rem; margin-top: 5px;">Pastikan koneksi internet stabil</p>
-                </div>
-            `;
-            
-            const qrStatus = document.getElementById('qr-status');
-            qrStatus.textContent = "QRIS Error - Coba Refresh";
-            qrStatus.className = "qr-invalid";
-            
-            showNotification("Gagal memuat QRIS. Cek koneksi internet.", true);
-        }
-
-        // Update tampilan QRIS
-        function updateQRISDisplay() {
+        // Update tampilan pembayaran
+        function updatePaymentDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
             // Update payment amount displays
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('total').textContent = formatRupiah(total);
+            document.getElementById('cash-amount').textContent = formatRupiah(total);
             
-            // Hide overlay jika QRIS sudah dimuat
-            const qrisImage = document.getElementById('qris-image');
-            const overlay = document.getElementById('qris-overlay');
+            // Update payment status
+            const paymentStatus = document.getElementById('payment-status');
             
-            if (qrisImage.complete && qrisImage.naturalHeight !== 0) {
-                overlay.style.display = 'none';
+            if (selectedPaymentMethod === 'tunai') {
+                paymentStatus.innerHTML = `
+                    <i class="fas fa-money-bill-wave"></i> 
+                    Pembayaran Tunai: ${formatRupiah(total)}
+                `;
+                document.getElementById('cash-payment-instructions').style.display = 'block';
+            } else {
+                paymentStatus.innerHTML = `
+                    <i class="fas fa-mobile-alt"></i> 
+                    Pembayaran Digital (${selectedPaymentMethod.toUpperCase()}): ${formatRupiah(total)}
+                `;
+                document.getElementById('cash-payment-instructions').style.display = 'none';
             }
             
-            // Update instructions based on total
+            // Update instructions
             const instructions = document.getElementById('payment-instructions');
-            if (total > 0) {
+            
+            if (selectedPaymentMethod === 'tunai') {
                 instructions.innerHTML = `
                     <i class="fas fa-info-circle"></i>
-                    <strong>Cara Pembayaran dengan QRIS ASLI:</strong> 
+                    <strong>Petunjuk Pembayaran Tunai:</strong> 
                     <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                        <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                        <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                        <li>Arahkan kamera ke QR Code di atas</li>
-                        <li><strong>MASUKKAN JUMLAH: ${formatRupiah(total)}</strong></li>
-                        <li>Konfirmasi pembayaran</li>
-                        <li>Transaksi akan tercatat di NMDI: ${qrisConfig.nmdi}</li>
+                        <li>Siapkan uang tunai sebesar: <strong>${formatRupiah(total)}</strong></li>
+                        <li>Serahkan uang kepada kasir</li>
+                        <li>Tunggu kembalian jika ada</li>
+                        <li>Transaksi akan tercatat di sistem</li>
                     </ol>
                 `;
-                
-                document.getElementById('payment-status').innerHTML = `
-                    <i class="fas fa-qrcode"></i> 
-                    Scan QRIS untuk pembayaran ${formatRupiah(total)}
-                `;
-                
-                document.getElementById('qr-status').textContent = `QRIS ASLI - Scan & Bayar: ${formatRupiah(total)}`;
             } else {
                 instructions.innerHTML = `
                     <i class="fas fa-info-circle"></i>
-                    <strong>Cara Pembayaran dengan QRIS ASLI:</strong> 
+                    <strong>Petunjuk Pembayaran Digital:</strong> 
                     <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                        <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                        <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                        <li>Arahkan kamera ke QR Code di atas</li>
-                        <li><strong>MASUKKAN JUMLAH: (isi jumlah manual)</strong></li>
+                        <li>Buka aplikasi ${selectedPaymentMethod.toUpperCase()}</li>
+                        <li>Masukkan jumlah: <strong>${formatRupiah(total)}</strong></li>
+                        <li>Scan QR Code atau masukkan nomor merchant</li>
                         <li>Konfirmasi pembayaran</li>
-                        <li>Transaksi akan tercatat di NMDI: ${qrisConfig.nmdi}</li>
+                        <li>Tunggu konfirmasi dari sistem</li>
                     </ol>
                 `;
-                
-                document.getElementById('payment-status').innerHTML = `
-                    <i class="fas fa-qrcode"></i> 
-                    QRIS ASLI BAKSO KALDU PUSAKA - Siap Discan
-                `;
-                
-                document.getElementById('qr-status').textContent = "QRIS ASLI - SCAN & BAYAR";
             }
-            
-            // Update QRIS status
-            const qrStatus = document.getElementById('qr-status');
-            qrStatus.className = "qr-valid";
-        }
-
-        // Test QRIS function
-        function testQRIS() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            if (total > 0) {
-                showNotification(`QRIS ASLI siap discan! Masukkan: ${formatRupiah(total)}`, false);
-            } else {
-                showNotification("QRIS ASLI Bakso Kaldu Pusaka siap discan. Masukkan jumlah manual.", false);
-            }
-            
-            // Log info untuk debugging
-            console.log("=== QRIS ASLI INFO ===");
-            console.log("NMDI:", qrisConfig.nmdi);
-            console.log("AO Code:", qrisConfig.aoCode);
-            console.log("Merchant:", qrisConfig.merchantName);
-            console.log("Total Transaksi:", formatRupiah(total));
-            console.log("QRIS Image URL:", qrisConfig.qrisImageUrl);
         }
 
         // Filter transaksi berdasarkan waktu
@@ -1793,7 +1606,32 @@
                     const id = parseInt(button.getAttribute('data-id'));
                     decreaseQuantity(id);
                 }
+                
+                // Handle pemilihan metode pembayaran
+                else if (target.closest('.payment-method')) {
+                    const methodElement = target.closest('.payment-method');
+                    const method = methodElement.getAttribute('data-method');
+                    selectPaymentMethod(method);
+                }
             });
+        }
+
+        // Pilih metode pembayaran
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Update tampilan metode yang dipilih
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                el.style.border = 'none';
+            });
+            
+            const selectedElement = document.querySelector(`.payment-method[data-method="${method}"]`);
+            selectedElement.style.boxShadow = '0 4px 8px rgba(33, 150, 243, 0.5)';
+            selectedElement.style.border = '2px solid #2196F3';
+            
+            updatePaymentDisplay();
+            showNotification(`Metode pembayaran dipilih: ${method.toUpperCase()}`);
         }
 
         // Tambah jumlah item
@@ -1815,7 +1653,7 @@
             }
             
             updateCartDisplay();
-            updateQRISDisplay();
+            updatePaymentDisplay();
             if (findMenuItemById(id)) {
                 showNotification(`${findMenuItemById(id).name} ditambahkan ke keranjang`);
             }
@@ -1837,7 +1675,7 @@
             }
             
             updateCartDisplay();
-            updateQRISDisplay();
+            updatePaymentDisplay();
         }
 
         // Update tampilan keranjang
@@ -1896,9 +1734,7 @@
                 <div style="margin-bottom: 20px;">
                     <p><strong>ID Transaksi:</strong> TRX${transaction.id}</p>
                     <p><strong>Tanggal:</strong> ${transaction.date}</p>
-                    <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod || 'QRIS ASLI'}</p>
-                    <p><strong>NMDI:</strong> ${transaction.nmdi || qrisConfig.nmdi}</p>
-                    <p><strong>Kode AO:</strong> ${transaction.aoCode || qrisConfig.aoCode}</p>
+                    <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod || 'Tunai'}</p>
                 </div>
                 
                 <h4 style="color: #c62828; margin-bottom: 15px; border-bottom: 1px solid #ffcdd2; padding-bottom: 5px;">Detail Pesanan:</h4>
@@ -1928,11 +1764,11 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 20px; padding: 10px; background-color: #f0f8ff; border-radius: 5px; border-left: 4px solid #2196F3;">
-                    <p><strong>Informasi QRIS:</strong></p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Pembayaran QRIS ASLI Berhasil'}</p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">NMDI: ${transaction.nmdi || qrisConfig.nmdi}</p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Merchant: ${transaction.merchant || 'BAKSO KALDU PUSAKA'}</p>
+                <div style="margin-top: 20px; padding: 10px; background-color: #e8f5e9; border-radius: 5px; border-left: 4px solid #4CAF50;">
+                    <p><strong>Informasi Pembayaran:</strong></p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Transaksi Berhasil'}</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Metode: ${transaction.paymentMethod || 'Tunai'}</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Waktu: ${transaction.date}</p>
                 </div>
             `;
             
@@ -1954,28 +1790,25 @@
                 date: new Date().toLocaleString('id-ID'),
                 items: [...cart.map(item => ({...item}))],
                 total,
-                paymentMethod: "QRIS ASLI",
-                nmdi: qrisConfig.nmdi,
-                aoCode: qrisConfig.aoCode,
-                merchant: qrisConfig.merchantName,
-                status: "SUCCESS - QRIS ASLI"
+                paymentMethod: selectedPaymentMethod.toUpperCase(),
+                status: "SUCCESS"
             };
             
             transactions.unshift(transaction);
             localStorage.setItem('baksoTransactions', JSON.stringify(transactions));
             
-            showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)} - QRIS ASLI tercatat`, false);
+            showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)} - Metode: ${selectedPaymentMethod.toUpperCase()}`, false);
             
             // Update semua tampilan
             updateCartDisplay();
-            updateQRISDisplay();
+            updatePaymentDisplay();
             renderTransactions();
             renderStatistics();
             
             // Reset keranjang
             cart = [];
             updateCartDisplay();
-            updateQRISDisplay();
+            updatePaymentDisplay();
         }
 
         // Render riwayat transaksi
@@ -1996,7 +1829,7 @@
                             <th>Detail Pesanan</th>
                             <th>Jumlah Item</th>
                             <th>Total</th>
-                            <th>Status</th>
+                            <th>Metode</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -2027,8 +1860,8 @@
                         <td>${itemCount} item</td>
                         <td><strong>${formatRupiah(transaction.total)}</strong></td>
                         <td>
-                            <span style="color: #4CAF50; font-weight: bold;">
-                                <i class="fas fa-check-circle"></i> ${transaction.status || 'QRIS ASLI'}
+                            <span style="color: #2196F3; font-weight: bold;">
+                                <i class="fas ${transaction.paymentMethod === 'TUNAI' ? 'fa-money-bill-wave' : 'fa-mobile-alt'}"></i> ${transaction.paymentMethod || 'Tunai'}
                             </span>
                         </td>
                         <td>
@@ -2076,15 +1909,14 @@
                 
                 doc.setFontSize(18);
                 doc.setTextColor(198, 40, 40);
-                doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS ASLI", 20, 20);
+                doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA", 20, 20);
                 
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
                 doc.text(`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`, 20, 30);
-                doc.text(`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`, 20, 37);
-                doc.text(`QRIS ASLI - Valid untuk Pembayaran Nyata`, 20, 44);
+                doc.text(`Total Transaksi: ${transactions.length}`, 20, 37);
                 
-                const headers = [['No', 'Tanggal', 'Detail Pesanan', 'Jml Item', 'Total', 'Status']];
+                const headers = [['No', 'Tanggal', 'Detail Pesanan', 'Jml Item', 'Total', 'Metode']];
                 const data = transactions.map((transaction, index) => {
                     const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                     const orderDetails = transaction.items.map(item => 
@@ -2097,7 +1929,7 @@
                         orderDetails.length > 50 ? orderDetails.substring(0, 47) + '...' : orderDetails,
                         `${itemCount} item`,
                         formatRupiah(transaction.total),
-                        transaction.status || 'QRIS ASLI'
+                        transaction.paymentMethod || 'Tunai'
                     ];
                 });
                 
@@ -2135,12 +1967,11 @@
                     didDrawPage: function(data) {
                         doc.setFontSize(8);
                         doc.setTextColor(128, 128, 128);
-                        doc.text('© 2024 Bakso Kaldu Pusaka - QRIS ASLI Payment System', data.settings.margin.left, doc.internal.pageSize.height - 10);
-                        doc.text('SATU QRIS UNTUK SEMUA - www.aspi-qris.id', data.settings.margin.left, doc.internal.pageSize.height - 5);
+                        doc.text('© 2024 Bakso Kaldu Pusaka - Sistem Penjualan', data.settings.margin.left, doc.internal.pageSize.height - 10);
                     }
                 });
                 
-                doc.save(`Laporan_Penjualan_Bakso_QRIS_ASLI_${new Date().toISOString().slice(0,10)}.pdf`);
+                doc.save(`Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.pdf`);
                 showNotification('Laporan PDF berhasil diekspor!');
             } catch (error) {
                 console.error('Error exporting to PDF:', error);
@@ -2158,13 +1989,11 @@
             try {
                 const data = [];
                 
-                data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS ASLI']);
+                data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA']);
                 data.push([`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`]);
-                data.push([`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`]);
-                data.push(['QRIS ASLI - Valid untuk Pembayaran Nyata']);
-                data.push(['SATU QRIS UNTUK SEMUA - www.aspi-qris.id']);
+                data.push([`Total Transaksi: ${transactions.length}`]);
                 data.push([]);
-                data.push(['No', 'Tanggal/Waktu', 'Detail Pesanan', 'Jumlah Item', 'Total', 'Status', 'NMDI']);
+                data.push(['No', 'Tanggal/Waktu', 'Detail Pesanan', 'Jumlah Item', 'Total', 'Metode']);
                 
                 transactions.forEach((transaction, index) => {
                     const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -2178,15 +2007,14 @@
                         orderDetails,
                         `${itemCount} item`,
                         transaction.total,
-                        transaction.status || 'QRIS ASLI',
-                        transaction.nmdi || qrisConfig.nmdi
+                        transaction.paymentMethod || 'Tunai'
                     ]);
                 });
                 
                 const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
                 
                 data.push([]);
-                data.push(['', 'TOTAL KESELURUHAN', '', '', overallTotal, '', '']);
+                data.push(['', 'TOTAL KESELURUHAN', '', '', overallTotal, '']);
                 
                 const ws = XLSX.utils.aoa_to_sheet(data);
                 
@@ -2196,15 +2024,14 @@
                     {wch: 50},
                     {wch: 12},
                     {wch: 15},
-                    {wch: 12},
-                    {wch: 20}
+                    {wch: 12}
                 ];
                 ws['!cols'] = wscols;
                 
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
                 
-                XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_QRIS_ASLI_${new Date().toISOString().slice(0,10)}.xlsx`);
+                XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.xlsx`);
                 showNotification('Laporan Excel berhasil diekspor!');
             } catch (error) {
                 console.error('Error exporting to Excel:', error);
@@ -2222,7 +2049,7 @@
             if (confirm('Apakah Anda yakin ingin mereset pesanan? Semua item di keranjang akan dihapus.')) {
                 cart = [];
                 updateCartDisplay();
-                updateQRISDisplay();
+                updatePaymentDisplay();
                 showNotification('Pesanan telah direset');
             }
         }
@@ -2234,7 +2061,7 @@
                 transactions = [];
                 localStorage.removeItem('baksoTransactions');
                 updateCartDisplay();
-                updateQRISDisplay();
+                updatePaymentDisplay();
                 renderTransactions();
                 renderStatistics();
                 showNotification('Semua data telah direset');
@@ -2244,13 +2071,8 @@
         // Inisialisasi aplikasi
         function initApp() {
             console.log("Initializing Bakso Kaldu Pusaka POS System...");
-            console.log("QRIS Image URL:", qrisConfig.qrisImageUrl);
             
             try {
-                // Setup QRIS image
-                const qrisImage = document.getElementById('qris-image');
-                qrisImage.src = qrisConfig.qrisImageUrl;
-                
                 // Render menu
                 renderMenuItems();
                 
@@ -2259,7 +2081,7 @@
                 
                 // Update displays
                 updateCartDisplay();
-                updateQRISDisplay();
+                updatePaymentDisplay();
                 renderTransactions();
                 renderStatistics();
                 updateDateTime();
@@ -2275,7 +2097,6 @@
                 document.getElementById('export-excel').addEventListener('click', exportToExcel);
                 document.getElementById('reset-btn').addEventListener('click', resetOrder);
                 document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
-                document.getElementById('test-qr-btn').addEventListener('click', testQRIS);
                 
                 // Event listener untuk modal
                 document.getElementById('close-modal').addEventListener('click', function() {
@@ -2303,7 +2124,7 @@
                 
                 // Tampilkan notifikasi startup
                 setTimeout(() => {
-                    showNotification(`Sistem Bakso Kaldu Pusaka siap! QRIS ASLI aktif dengan NMDI: ${qrisConfig.nmdi}`);
+                    showNotification(`Sistem Bakso Kaldu Pusaka siap! Pilih metode pembayaran untuk melanjutkan.`);
                 }, 1000);
                 
             } catch (error) {
@@ -2314,27 +2135,6 @@
 
         // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
-        
-        // Fallback jika QRIS image gagal load
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const qrisImage = document.getElementById('qris-image');
-                const overlay = document.getElementById('qris-overlay');
-                
-                if (!qrisImage.complete || qrisImage.naturalHeight === 0) {
-                    console.log("QRIS image not loaded, showing overlay");
-                    overlay.style.display = 'flex';
-                    overlay.innerHTML = `
-                        <div style="text-align: center; color: #666;">
-                            <i class="fas fa-qrcode" style="font-size: 3rem; color: #2196F3; margin-bottom: 10px;"></i>
-                            <p>QRIS ASLI BAKSO KALDU PUSAKA</p>
-                            <p style="font-size: 0.9rem; margin-top: 5px;">NMDI: ${qrisConfig.nmdi}</p>
-                            <p style="font-size: 0.8rem; margin-top: 5px;">Scan QRIS untuk pembayaran</p>
-                        </div>
-                    `;
-                }
-            }, 2000);
-        });
     </script>
 </body>
 </html>
