@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -107,6 +108,13 @@
             margin-bottom: 30px;
         }
         
+        .menu-category h3 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid #c62828;
+        }
+        
         .menu-item {
             display: flex;
             justify-content: space-between;
@@ -173,6 +181,21 @@
             max-height: 300px;
             overflow-y: auto;
             margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        
+        .cart-items::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .cart-items::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .cart-items::-webkit-scrollbar-thumb {
+            background: #c62828;
+            border-radius: 10px;
         }
         
         .cart-item {
@@ -346,8 +369,9 @@
         .date-time {
             margin-top: 10px;
             font-size: 0.9rem;
-            color: #666;
+            color: #fff;
             text-align: center;
+            opacity: 0.9;
         }
         
         footer {
@@ -357,6 +381,31 @@
             border-top: 1px solid #ddd;
             color: #666;
             font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background-color: #f44336;
         }
     </style>
 </head>
@@ -380,21 +429,21 @@
                 <div class="menu-category">
                     <h3>Menu Utama</h3>
                     <div id="main-menu-items">
-                        <!-- Menu items will be populated by JavaScript -->
+                        <!-- Menu items akan diisi JavaScript -->
                     </div>
                 </div>
                 
                 <div class="menu-category">
                     <h3>Menu Tambahan</h3>
                     <div id="additional-menu-items">
-                        <!-- Menu items will be populated by JavaScript -->
+                        <!-- Menu items akan diisi JavaScript -->
                     </div>
                 </div>
                 
                 <div class="menu-category">
                     <h3>Minuman</h3>
                     <div id="drink-menu-items">
-                        <!-- Menu items will be populated by JavaScript -->
+                        <!-- Menu items akan diisi JavaScript -->
                     </div>
                 </div>
             </div>
@@ -403,7 +452,7 @@
                 <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Keranjang Pesanan</h2>
                 
                 <div class="cart-items" id="cart-items-container">
-                    <!-- Cart items will be populated by JavaScript -->
+                    <div class="empty-cart">Keranjang kosong. Tambahkan item dari menu.</div>
                 </div>
                 
                 <div class="cart-total">
@@ -445,7 +494,7 @@
         <div class="transactions-history">
             <h2 class="section-title"><i class="fas fa-history"></i> Riwayat Transaksi</h2>
             <div id="transactions-container">
-                <!-- Transactions will be populated by JavaScript -->
+                <!-- Riwayat transaksi akan diisi JavaScript -->
             </div>
         </div>
         
@@ -453,6 +502,12 @@
             <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan. Semua hak dilindungi.</p>
             <p>Versi 1.0 | Terakhir diperbarui: Maret 2024</p>
         </footer>
+    </div>
+
+    <!-- Notification Element -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message">Pesan notifikasi</span>
     </div>
 
     <script>
@@ -511,70 +566,116 @@
             document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options);
         }
 
+        // Tampilkan notifikasi
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notification-message');
+            
+            messageElement.textContent = message;
+            notification.className = 'notification';
+            
+            if (isError) {
+                notification.classList.add('error');
+                notification.querySelector('i').className = 'fas fa-exclamation-circle';
+            } else {
+                notification.querySelector('i').className = 'fas fa-check-circle';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
         // Render menu items
         function renderMenuItems() {
             // Menu utama
             const mainMenuContainer = document.getElementById('main-menu-items');
             mainMenuContainer.innerHTML = '';
             
-            menuData.main.forEach(item => {
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <div class="menu-item-info">
-                        <div class="menu-item-name">${item.name}</div>
-                    </div>
-                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
-                    <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
-                        <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
-                    </div>
-                `;
-                mainMenuContainer.appendChild(menuItem);
-            });
+            if (menuData.main.length === 0) {
+                mainMenuContainer.innerHTML = '<div class="empty-cart">Tidak ada menu tersedia</div>';
+            } else {
+                menuData.main.forEach(item => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    menuItem.innerHTML = `
+                        <div class="menu-item-info">
+                            <div class="menu-item-name">${item.name}</div>
+                        </div>
+                        <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                        <div class="menu-item-controls">
+                            <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display" id="quantity-${item.id}">0</span>
+                            <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    `;
+                    mainMenuContainer.appendChild(menuItem);
+                });
+            }
             
-            // Menu tambahan
+              // Menu tambahan
             const additionalMenuContainer = document.getElementById('additional-menu-items');
             additionalMenuContainer.innerHTML = '';
             
-            menuData.additional.forEach(item => {
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <div class="menu-item-info">
-                        <div class="menu-item-name">${item.name}</div>
-                    </div>
-                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
-                    <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
-                        <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
-                    </div>
-                `;
-                additionalMenuContainer.appendChild(menuItem);
-            });
+            if (menuData.additional.length === 0) {
+                additionalMenuContainer.innerHTML = '<div class="empty-cart">Tidak ada menu tersedia</div>';
+            } else {
+                menuData.additional.forEach(item => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    menuItem.innerHTML = `
+                        <div class="menu-item-info">
+                            <div class="menu-item-name">${item.name}</div>
+                        </div>
+                        <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                        <div class="menu-item-controls">
+                            <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display" id="quantity-${item.id}">0</span>
+                            <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    `;
+                    additionalMenuContainer.appendChild(menuItem);
+                });
+            }
             
             // Minuman
             const drinkMenuContainer = document.getElementById('drink-menu-items');
             drinkMenuContainer.innerHTML = '';
             
-            menuData.drinks.forEach(item => {
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <div class="menu-item-info">
-                        <div class="menu-item-name">${item.name}</div>
-                    </div>
-                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
-                    <div class="menu-item-controls">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
-                        <span class="quantity-display" id="quantity-${item.id}">0</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
-                    </div>
-                `;
-                drinkMenuContainer.appendChild(menuItem);
-            });
+            if (menuData.drinks.length === 0) {
+                drinkMenuContainer.innerHTML = '<div class="empty-cart">Tidak ada menu tersedia</div>';
+            } else {
+                menuData.drinks.forEach(item => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    menuItem.innerHTML = `
+                        <div class="menu-item-info">
+                            <div class="menu-item-name">${item.name}</div>
+                        </div>
+                        <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                        <div class="menu-item-controls">
+                            <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display" id="quantity-${item.id}">0</span>
+                            <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    `;
+                    drinkMenuContainer.appendChild(menuItem);
+                });
+            }
         }
 
         // Cari item menu berdasarkan ID
@@ -600,6 +701,7 @@
             }
             
             updateCartDisplay();
+            showNotification(`${findMenuItem(id).name} ditambahkan ke keranjang`);
         }
 
         // Kurangi jumlah item
@@ -607,17 +709,20 @@
             const itemIndex = cart.findIndex(item => item.id === id);
             
             if (itemIndex !== -1) {
+                const itemName = cart[itemIndex].name;
                 if (cart[itemIndex].quantity > 1) {
                     cart[itemIndex].quantity--;
+                    showNotification(`Jumlah ${itemName} dikurangi`);
                 } else {
                     cart.splice(itemIndex, 1);
+                    showNotification(`${itemName} dihapus dari keranjang`);
                 }
             }
             
             updateCartDisplay();
         }
 
-              // Update tampilan keranjang
+        // Update tampilan keranjang
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
             
@@ -644,17 +749,17 @@
             if (cart.length === 0) {
                 cartContainer.innerHTML = '<div class="empty-cart">Keranjang kosong. Tambahkan item dari menu.</div>';
             } else {
-                cartContainer.innerHTML = '';
+                let cartHTML = '';
                 cart.forEach(item => {
-                    const cartItem = document.createElement('div');
-                    cartItem.className = 'cart-item';
-                    cartItem.innerHTML = `
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-quantity">${item.quantity}x</div>
-                        <div class="cart-item-price">${formatRupiah(item.price * item.quantity)}</div>
+                    cartHTML += `
+                        <div class="cart-item">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-quantity">${item.quantity}x</div>
+                            <div class="cart-item-price">${formatRupiah(item.price * item.quantity)}</div>
+                        </div>
                     `;
-                    cartContainer.appendChild(cartItem);
                 });
+                cartContainer.innerHTML = cartHTML;
             }
             
             // Hitung total
@@ -670,7 +775,7 @@
         // Simpan transaksi
         function saveTransaction() {
             if (cart.length === 0) {
-                alert('Keranjang kosong. Tambahkan item terlebih dahulu.');
+                showNotification('Keranjang kosong. Tambahkan item terlebih dahulu.', true);
                 return;
             }
             
@@ -697,7 +802,7 @@
             // Update riwayat transaksi
             renderTransactions();
             
-            alert(`Transaksi berhasil disimpan!\nTotal: ${formatRupiah(total)}`);
+            showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)}`);
         }
 
         // Render riwayat transaksi
@@ -723,7 +828,8 @@
                     </thead>
                     <tbody>
             `;
-          transactions.forEach((transaction, index) => {
+            
+            transactions.forEach((transaction, index) => {
                 const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                 
                 tableHTML += `
@@ -735,59 +841,198 @@
                         <td>${formatRupiah(transaction.tax)}</td>
                         <td><strong>${formatRupiah(transaction.total)}</strong></td>
                     </tr>
-          // Data transaksi
-            transactions.forEach((transaction, index) => {
-                const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
-                data.push([
-                    index + 1,
-                    transaction.date,
-                    `${itemCount} item`,
-                    transaction.subtotal,
-                    transaction.tax,
-                    transaction.total
-                ]);
+                `;
             });
             
-            // Total keseluruhan
+            // Hitung total keseluruhan
             const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
             const overallSubtotal = transactions.reduce((sum, transaction) => sum + transaction.subtotal, 0);
             const overallTax = transactions.reduce((sum, transaction) => sum + transaction.tax, 0);
             
-            data.push([]);
-            data.push(['', 'TOTAL KESELURUHAN', '', overallSubtotal, overallTax, overallTotal]);
+            tableHTML += `
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f9f9f9; font-weight: bold;">
+                        <td colspan="3" style="text-align: right;">TOTAL KESELURUHAN:</td>
+                        <td>${formatRupiah(overallSubtotal)}</td>
+                        <td>${formatRupiah(overallTax)}</td>
+                        <td>${formatRupiah(overallTotal)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            `;
             
-            // Buat worksheet
-            const ws = XLSX.utils.aoa_to_sheet(data);
+            container.innerHTML = tableHTML;
+        }
+
+        // Ekspor ke PDF
+        function exportToPDF() {
+            if (transactions.length === 0) {
+                showNotification('Tidak ada data transaksi untuk diekspor.', true);
+                return;
+            }
             
-            // Format kolom
-            const wscols = [
-                {wch: 5},  // No
-                {wch: 25}, // Tanggal
-                {wch: 12}, // Jumlah Item
-                {wch: 15}, // Subtotal
-                {wch: 15}, // Pajak
-                {wch: 15}  // Total
-            ];
-            ws['!cols'] = wscols;
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Judul
+                doc.setFontSize(18);
+                doc.setTextColor(198, 40, 40);
+                doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA", 20, 20);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`, 20, 30);
+                
+                // Data transaksi
+                const headers = [['No', 'Tanggal', 'Jml Item', 'Subtotal', 'Pajak', 'Total']];
+                const data = transactions.map((transaction, index) => {
+                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                    return [
+                        index + 1,
+                        transaction.date,
+                        `${itemCount} item`,
+                        formatRupiah(transaction.subtotal),
+                        formatRupiah(transaction.tax),
+                        formatRupiah(transaction.total)
+                    ];
+                });
+                
+                // Total keseluruhan
+                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+                const overallSubtotal = transactions.reduce((sum, transaction) => sum + transaction.subtotal, 0);
+                const overallTax = transactions.reduce((sum, transaction) => sum + transaction.tax, 0);
+                
+                data.push([
+                    '',
+                    'TOTAL KESELURUHAN',
+                    '',
+                    formatRupiah(overallSubtotal),
+                    formatRupiah(overallTax),
+                    formatRupiah(overallTotal)
+                ]);
+                
+                doc.autoTable({
+                    head: headers,
+                    body: data,
+                    startY: 40,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [198, 40, 40],
+                        textColor: [255, 255, 255],
+                        fontSize: 10
+                    },
+                    bodyStyles: { fontSize: 9 },
+                    footStyles: { 
+                        fillColor: [255, 205, 210],
+                        textColor: [0, 0, 0],
+                        fontSize: 10,
+                        fontStyle: 'bold'
+                    },
+                    didDrawPage: function(data) {
+                        doc.setFontSize(8);
+                        doc.setTextColor(128, 128, 128);
+                        doc.text('© 2024 Bakso Kaldu Pusaka - Laporan Penjualan', data.settings.margin.left, doc.internal.pageSize.height - 10);
+                    }
+                });
+                
+                doc.save(`Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.pdf`);
+                showNotification('Laporan PDF berhasil diekspor!');
+            } catch (error) {
+                console.error('Error exporting to PDF:', error);
+                showNotification('Terjadi kesalahan saat mengekspor PDF', true);
+            }
+        }
+
+        // Ekspor ke Excel
+        function exportToExcel() {
+            if (transactions.length === 0) {
+                showNotification('Tidak ada data transaksi untuk diekspor.', true);
+                return;
+            }
             
-            // Buat workbook
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
-            
-            // Ekspor ke file
-            XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.xlsx`);
+            try {
+                // Siapkan data untuk Excel
+                const data = [];
+                
+                // Header
+                data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA']);
+                data.push([`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`]);
+                data.push([]);
+                data.push(['No', 'Tanggal/Waktu', 'Jumlah Item', 'Subtotal', 'Pajak', 'Total']);
+                
+                // Data transaksi
+                transactions.forEach((transaction, index) => {
+                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                    data.push([
+                        index + 1,
+                        transaction.date,
+                        `${itemCount} item`,
+                        transaction.subtotal,
+                        transaction.tax,
+                        transaction.total
+                    ]);
+                });
+                
+                // Total keseluruhan
+                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+                const overallSubtotal = transactions.reduce((sum, transaction) => sum + transaction.subtotal, 0);
+                const overallTax = transactions.reduce((sum, transaction) => sum + transaction.tax, 0);
+                
+                data.push([]);
+                data.push(['', 'TOTAL KESELURUHAN', '', overallSubtotal, overallTax, overallTotal]);
+                
+                // Buat worksheet
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                
+                // Format kolom
+                const wscols = [
+                    {wch: 5},   // No
+                    {wch: 25},  // Tanggal
+                    {wch: 12},  // Jumlah Item
+                    {wch: 15},  // Subtotal
+                    {wch: 15},  // Pajak
+                    {wch: 15}   // Total
+                ];
+                ws['!cols'] = wscols;
+                
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
+                
+                // Ekspor ke file
+                XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.xlsx`);
+                showNotification('Laporan Excel berhasil diekspor!');
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('Terjadi kesalahan saat mengekspor Excel', true);
+            }
         }
 
         // Reset pesanan
         function resetOrder() {
             if (cart.length === 0) {
-                alert('Tidak ada pesanan untuk direset.');
+                showNotification('Tidak ada pesanan untuk direset.', true);
                 return;
             }
             
             if (confirm('Apakah Anda yakin ingin mereset pesanan? Semua item di keranjang akan dihapus.')) {
                 cart = [];
                 updateCartDisplay();
+                showNotification('Pesanan telah direset');
+            }
+        }
+
+        // Reset semua data (termasuk riwayat)
+        function resetAllData() {
+            if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
+                cart = [];
+                transactions = [];
+                localStorage.removeItem('baksoTransactions');
+                updateCartDisplay();
+                renderTransactions();
+                showNotification('Semua data telah direset');
             }
         }
 
@@ -801,11 +1046,22 @@
             // Update waktu setiap detik
             setInterval(updateDateTime, 1000);
             
-            // Event listeners
+            // Event listeners untuk tombol
             document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
             document.getElementById('export-pdf').addEventListener('click', exportToPDF);
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
             document.getElementById('reset-btn').addEventListener('click', resetOrder);
+            
+            // Tambahkan tombol reset all di footer (opsional)
+            const footer = document.querySelector('footer');
+            const resetAllBtn = document.createElement('button');
+            resetAllBtn.className = 'btn btn-reset';
+            resetAllBtn.style.marginTop = '10px';
+            resetAllBtn.style.padding = '8px 15px';
+            resetAllBtn.style.fontSize = '0.8rem';
+            resetAllBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Reset Semua Data';
+            resetAllBtn.addEventListener('click', resetAllData);
+            footer.appendChild(resetAllBtn);
         }
 
         // Jalankan aplikasi saat halaman dimuat
