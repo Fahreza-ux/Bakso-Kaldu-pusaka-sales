@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bakso Kaldu Pusaka - Sistem Penjualan + QRIS DINAMIS + Dashboard</title>
+    <title>Bakso Kaldu Pusaka - Sistem Penjualan + Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-svg@1.1.0/dist/qrcode-svg.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
-        /* CSS tetap sama seperti sebelumnya */
         * {
             margin: 0;
             padding: 0;
@@ -65,7 +62,7 @@
             opacity: 0.9;
         }
         
-        .nmid-info {
+        .payment-info {
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 5px;
@@ -268,7 +265,7 @@
             margin-top: 10px;
         }
         
-        .qris-section {
+        .payment-section {
             background: #f0f8ff;
             border-radius: 10px;
             padding: 20px;
@@ -277,7 +274,7 @@
             text-align: center;
         }
         
-        .qris-title {
+        .payment-title {
             color: #2196F3;
             margin-bottom: 15px;
             display: flex;
@@ -286,49 +283,49 @@
             gap: 10px;
         }
         
-        .qris-container {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 15px;
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .payment-methods {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            margin-top: 15px;
         }
         
-        #qris-canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 5px;
-        }
-        
-        #qris-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 5px;
-        }
-        
-        .qris-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .payment-method {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            color: #000;
-            border-radius: 5px;
-            display: none;
+            gap: 5px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 110px;
+            transition: all 0.2s;
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .payment-method.active {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .payment-method.active .payment-icon {
+            color: white;
+        }
+        
+        .payment-icon {
+            font-size: 1.8rem;
+            color: #2196F3;
+        }
+        
+        .payment-method-name {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .payment-amount {
@@ -353,16 +350,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-        }
-        
-        .payment-status.scan {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-        
-        .payment-status.paid {
-            background: #e8f5e9;
-            color: #2e7d32;
         }
         
         .action-buttons {
@@ -396,6 +383,17 @@
             box-shadow: 0 4px 8px rgba(198, 40, 40, 0.3);
         }
         
+        .btn-secondary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
         .btn-export {
             background-color: #2196F3;
             color: white;
@@ -416,6 +414,14 @@
             background-color: #F57C00;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+        }
+        
+        .btn i {
+            font-size: 1.2rem;
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .export-options {
@@ -457,6 +463,355 @@
             transform: translateY(-5px);
         }
         
+        .stat-card.income {
+            border-top: 5px solid #4CAF50;
+        }
+        
+        .stat-card.transactions {
+            border-top: 5px solid #2196F3;
+        }
+        
+        .stat-card.items {
+            border-top: 5px solid #FF9800;
+        }
+        
+        .stat-card.average {
+            border-top: 5px solid #9C27B0;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-icon.income {
+            background-color: #E8F5E9;
+            color: #4CAF50;
+        }
+        
+        .stat-icon.transactions {
+            background-color: #E3F2FD;
+            color: #2196F3;
+        }
+        
+        .stat-icon.items {
+            background-color: #FFF3E0;
+            color: #FF9800;
+        }
+        
+        .stat-icon.average {
+            background-color: #F3E5F5;
+            color: #9C27B0;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+            color: #333;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1100px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .chart-title {
+            color: #c62828;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .top-items-list {
+            margin-top: 30px;
+        }
+        
+        .top-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .top-items-table th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            color: #c62828;
+        }
+        
+        .top-items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .top-items-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .rank {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background-color: #c62828;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .transactions-history {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .transactions-table th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            color: #c62828;
+        }
+        
+        .transactions-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .transactions-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .transaction-details {
+            max-width: 300px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .transaction-item-name {
+            flex: 1;
+            color: #333;
+        }
+        
+        .transaction-item-qty {
+            margin: 0 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .transaction-item-price {
+            min-width: 80px;
+            text-align: right;
+            color: #c62828;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .date-time {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #fff;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        .time-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .time-filter-btn {
+            padding: 8px 15px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #333;
+        }
+        
+        .time-filter-btn.active {
+            background-color: #c62828;
+            color: white;
+            border-color: #c62828;
+        }
+        
+        .time-filter-btn:hover:not(.active) {
+            background-color: #e0e0e0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ffcdd2;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            color: #c62828;
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .transaction-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .view-details-btn {
+            background: none;
+            border: none;
+            color: #2196F3;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+        
+        .view-details-btn:hover {
+            color: #1976D2;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        
         .payment-instructions {
             background: #FFF3E0;
             padding: 10px;
@@ -467,50 +822,46 @@
             border-left: 4px solid #FF9800;
         }
         
-        .qris-active {
-            background: #e8f5e9 !important;
-            color: #2e7d32 !important;
-            border: 2px solid #4CAF50 !important;
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #c62828;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        .qris-generated {
-            animation: pulse 2s infinite;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-        }
-        
-        .amount-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #c62828;
-            margin: 10px 0;
-            padding: 8px;
-            background: #fff3e0;
+        .cash-payment {
+            background: #e8f5e9;
+            padding: 10px;
             border-radius: 5px;
-            border: 2px dashed #ff9800;
-        }
-        
-        .qris-test-btn {
-            background: #9c27b0;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-top: 15px;
             font-size: 0.9rem;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin: 10px auto;
+            display: none;
         }
         
-        .qris-test-btn:hover {
-            background: #7b1fa2;
+        .cash-payment.active {
+            display: block;
+        }
+        
+        .payment-instruction-detail {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            border-left: 4px solid #6c757d;
+            display: none;
+        }
+        
+        .payment-instruction-detail.active {
+            display: block;
         }
     </style>
 </head>
@@ -521,12 +872,12 @@
                 <i class="fas fa-utensils"></i>
                 <div>
                     <h1>BAKSO KALDU PUSAKA</h1>
-                    <p class="subtitle">Sistem Penjualan + QRIS DINAMIS + Dashboard Statistik</p>
+                    <p class="subtitle">Sistem Penjualan + Dashboard Statistik</p>
                 </div>
             </div>
-            <div class="nmid-info">
-                <p><i class="fas fa-qrcode"></i> NMDI: ID1025450423864 | AO1 - QRIS DINAMIS BERFUNGSI</p>
-                <p>QRIS Update Otomatis sesuai jumlah pembayaran</p>
+            <div class="payment-info">
+                <p><i class="fas fa-cash-register"></i> Sistem Penjualan Tunai & Non-Tunai</p>
+                <p>Pembayaran tunai dan digital diterima</p>
             </div>
             <p class="date-time" id="currentDateTime">Minggu, 3 Maret 2024 10:30:15</p>
         </header>
@@ -538,21 +889,35 @@
                 <div class="menu-category">
                     <h3>Menu Utama</h3>
                     <div id="main-menu-items">
-                        <!-- Menu items akan diisi JavaScript -->
+                        <!-- Bakso daging Rp 25.000 -->
+                        <!-- Bakso urat Rp 30.000 -->
+                        <!-- Daging brisket bihun/kwetiaw Rp 35.000 -->
+                        <!-- Bakso daging special Rp 40.000 -->
+                        <!-- Bakso urat special Rp 40.000 -->
                     </div>
                 </div>
                 
                 <div class="menu-category">
                     <h3>Menu Tambahan</h3>
                     <div id="additional-menu-items">
-                        <!-- Menu items akan diisi JavaScript -->
+                        <!-- Kerupuk kaleng Rp 3.000 -->
+                        <!-- Nasi Rp 5.000 -->
+                        <!-- Tetelan Rp 10.000 -->
+                        <!-- Urat sapi / koyor Rp 25.000 -->
                     </div>
                 </div>
                 
                 <div class="menu-category">
                     <h3>Minuman</h3>
                     <div id="drink-menu-items">
-                        <!-- Menu items akan diisi JavaScript -->
+                        <!-- Es teh tawar Rp 4.000 -->
+                        <!-- Teh tawar hangat Rp 4.000 -->
+                        <!-- Mineral Rp 5.000 -->
+                        <!-- Es teh manis Rp 6.000 -->
+                        <!-- Teh manis hangat Rp 6.000 -->
+                        <!-- Es jeruk Rp 8.000 -->
+                        <!-- Jeruk hangat Rp 8.000 -->
+                        <!-- Teh botol Rp 8.000 -->
                     </div>
                 </div>
             </div>
@@ -571,55 +936,87 @@
                     </div>
                 </div>
                 
-                <div class="qris-section">
-                    <h3 class="qris-title">
-                        <i class="fas fa-qrcode"></i> PEMBAYARAN QRIS DINAMIS
+                <div class="payment-section">
+                    <h3 class="payment-title">
+                        <i class="fas fa-credit-card"></i> METODE PEMBAYARAN
                     </h3>
                     
                     <div class="payment-amount" id="payment-amount">
                         Rp 0
                     </div>
                     
-                    <div class="payment-status scan" id="payment-status">
-                        <i class="fas fa-qrcode"></i>
-                        <span id="status-text">QRIS Siap Discan - Jumlah: Rp 0</span>
+                    <div class="payment-status" id="payment-status">
+                        <i class="fas fa-cash-register"></i>
+                        Pilih metode pembayaran
                     </div>
                     
-                    <div class="qris-container qris-generated" id="qris-container">
-                        <!-- QR Code akan digenerate di sini -->
-                        <div id="qris-qrcode"></div>
+                    <div class="payment-methods">
+                        <div class="payment-method active" data-method="tunai">
+                            <div class="payment-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <span class="payment-method-name">TUNAI</span>
+                        </div>
+                        <div class="payment-method" data-method="debit">
+                            <div class="payment-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span class="payment-method-name">KARTU DEBIT</span>
+                        </div>
+                        <div class="payment-method" data-method="transfer">
+                            <div class="payment-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <span class="payment-method-name">TRANSFER</span>
+                        </div>
+                        <div class="payment-method" data-method="e-wallet">
+                            <div class="payment-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <span class="payment-method-name">E-WALLET</span>
+                        </div>
                     </div>
                     
-                    <div class="amount-display" id="qris-amount-display">
-                        Jumlah QRIS: <span id="qris-amount">Rp 0</span>
-                    </div>
-                    
-                    <button class="qris-test-btn" id="test-qr-btn">
-                        <i class="fas fa-mobile-alt"></i> Test QRIS Dinamis
-                    </button>
-                    
-                    <div class="payment-instructions" id="payment-instructions">
+                    <div class="cash-payment active" id="cash-instructions">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Cara Pembayaran dengan QRIS DINAMIS:</strong> 
-                        <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                            <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                            <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                            <li>Arahkan kamera ke QR Code di atas</li>
-                            <li id="amount-instruction"><strong>Jumlah akan terisi otomatis: Rp 0</strong></li>
-                            <li>Konfirmasi pembayaran</li>
-                            <li>Transaksi akan tercatat di NMDI: ID1025450423864</li>
-                        </ol>
+                        <strong>Pembayaran Tunai:</strong> 
+                        <div>Total: <strong id="cash-total">Rp 0</strong></div>
+                        <div style="font-size: 0.85rem; margin-top: 5px;">Siapkan uang pas atau tunai</div>
                     </div>
                     
-                    <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 0.85rem;">
-                        <p><i class="fas fa-check-circle" style="color: #4CAF50;"></i> <strong>QRIS DINAMIS AKTIF</strong></p>
-                        <p style="font-size: 0.75rem; margin-top: 5px;">Setiap perubahan jumlah akan update QRIS secara otomatis</p>
+                    <div class="payment-instruction-detail" id="debit-instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Kartu Debit:</strong> 
+                        <div style="font-size: 0.85rem; margin-top: 5px;">Gesek kartu di EDC atau masukkan manual</div>
+                    </div>
+                    
+                    <div class="payment-instruction-detail" id="transfer-instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Transfer Bank:</strong> 
+                        <div style="font-size: 0.85rem; margin-top: 5px;">Transfer ke rekening BCA: 123-456-7890 a.n Bakso Kaldu Pusaka</div>
+                    </div>
+                    
+                    <div class="payment-instruction-detail" id="e-wallet-instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>E-Wallet:</strong> 
+                        <div style="font-size: 0.85rem; margin-top: 5px;">Scan QR Code atau bayar dengan OVO/DANA/GoPay</div>
+                    </div>
+                    
+                    <div class="payment-instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Petunjuk Umum:</strong> 
+                        <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
+                            <li>Pilih metode pembayaran di atas</li>
+                            <li>Klik "Simpan Transaksi" untuk menyelesaikan</li>
+                            <li>Transaksi akan tercatat di sistem</li>
+                            <li>Cetak struk jika diperlukan</li>
+                        </ol>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button class="btn btn-primary" id="checkout-btn">
-                        <i class="fas fa-cash-register"></i> Simpan Transaksi & Reset QRIS
+                        <i class="fas fa-cash-register"></i> Simpan Transaksi
                     </button>
                     
                     <div class="export-options">
@@ -642,8 +1039,66 @@
         <div class="dashboard-section">
             <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Statistik Penjualan</h2>
             
+            <div class="time-filter" id="time-filter">
+                <button class="time-filter-btn active" data-range="all">Semua</button>
+                <button class="time-filter-btn" data-range="today">Hari Ini</button>
+                <button class="time-filter-btn" data-range="week">Minggu Ini</button>
+                <button class="time-filter-btn" data-range="month">Bulan Ini</button>
+            </div>
+            
             <div class="stats-cards" id="stats-cards">
                 <!-- Stats cards akan diisi JavaScript -->
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Pendapatan per Hari</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Kategori Menu Terlaris</h3>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title"><i class="fas fa-star"></i> 5 Menu Terlaris</h3>
+                <div class="top-items-list" id="top-items-list">
+                    <!-- Top items akan diisi JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="transactions-history">
+            <h2 class="section-title"><i class="fas fa-history"></i> Riwayat Transaksi</h2>
+            <div id="transactions-container">
+                <!-- Riwayat transaksi akan diisi JavaScript -->
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + Dashboard. Semua hak dilindungi.</p>
+            <p>Versi 2.3 | Pembayaran Tunai & Digital | Terakhir diperbarui: Maret 2024</p>
+            <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
+                <i class="fas fa-trash-alt"></i> Reset Semua Data
+            </button>
+        </footer>
+    </div>
+
+    <!-- Modal untuk Detail Transaksi -->
+    <div class="modal" id="transaction-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detail Transaksi</h3>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Detail transaksi akan diisi JavaScript -->
             </div>
         </div>
     </div>
@@ -655,7 +1110,7 @@
     </div>
 
     <script>
-        // Data menu
+        // Data menu LENGKAP sesuai gambar
         const menuData = {
             main: [
                 { id: 1, name: "Bakso daging", price: 25000, category: "utama" },
@@ -685,13 +1140,23 @@
         // State aplikasi
         let cart = [];
         let transactions = JSON.parse(localStorage.getItem('baksoTransactions')) || [];
-        let currentQRISAmount = 0;
+        let currentTimeRange = 'all';
+        let selectedPaymentMethod = 'tunai';
+        let revenueChartInstance = null;
+        let categoryChartInstance = null;
 
-        // Format Rupiah
+        // Format angka ke Rupiah
         function formatRupiah(amount) {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Format angka tanpa Rp
+        function formatNumber(amount) {
+            return new Intl.NumberFormat('id-ID', {
                 minimumFractionDigits: 0
             }).format(amount);
         }
@@ -733,215 +1198,382 @@
             }, 3000);
         }
 
-        // Generate QRIS Dinamis yang BENAR-BENAR berfungsi
-        function generateDynamicQRIS(amount) {
-            try {
-                // Clear previous QR Code
-                document.getElementById('qris-qrcode').innerHTML = '';
-                
-                // Data untuk QRIS sesuai standar Indonesia
-                // Format: EMVCo Merchant Presented QR Code
-                let qrisData = "";
-                
-                if (amount > 0) {
-                    // Dynamic QRIS dengan amount
-                    qrisData = generateQRISPayload(amount, true);
-                    console.log("QRIS Dinamis dengan amount:", amount, "Data:", qrisData);
-                } else {
-                    // Static QRIS tanpa amount
-                    qrisData = generateQRISPayload(0, false);
-                    console.log("QRIS Static tanpa amount, Data:", qrisData);
-                }
-                
-                // Generate QR Code menggunakan library QRCode.js
-                new QRCode(document.getElementById('qris-qrcode'), {
-                    text: qrisData,
-                    width: 200,
-                    height: 200,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-                
-                // Update UI
-                document.getElementById('qris-amount').textContent = formatRupiah(amount);
-                document.getElementById('amount-instruction').innerHTML = 
-                    `<strong>Jumlah akan terisi otomatis: ${formatRupiah(amount)}</strong>`;
-                
-                // Animasi untuk menunjukkan QRIS aktif
-                const container = document.getElementById('qris-container');
-                container.classList.add('qris-generated');
-                
-                setTimeout(() => {
-                    container.classList.remove('qris-generated');
-                }, 2000);
-                
-                currentQRISAmount = amount;
-                
-                return true;
-                
-            } catch (error) {
-                console.error("Error generating QRIS:", error);
-                showNotification("Error membuat QRIS: " + error.message, true);
-                return false;
-            }
-        }
-
-        // Generate payload QRIS sesuai standar
-        function generateQRISPayload(amount, includeAmount = true) {
-            // Merchant data
-            const merchantData = {
-                nmdi: "ID1025450423864",
-                merchantName: "BAKSO KALDU PUSAKA",
-                merchantCity: "JAKARTA",
-                mcc: "5812", // Merchant Category Code: Restaurants
-                currency: "360", // IDR
-                country: "ID"
-            };
-            
-            // Build EMVCo QR Code string
-            let payload = "";
-            
-            // Payload Format Indicator (00)
-            payload += "000201";
-            
-            // Point of Initiation Method (01)
-            // 11 = static, 12 = dynamic
-            payload += includeAmount ? "010212" : "010211";
-            
-            // Merchant Account Information (26)
-            payload += "26";
-            let merchantInfo = "";
-            
-            // GUID (00)
-            merchantInfo += "0016ID.CO.QRIS.WWW";
-            
-            // Merchant ID (01) - NMDI
-            merchantInfo += "0115" + merchantData.nmdi;
-            
-            // AO Code (02)
-            merchantInfo += "0203AO1";
-            
-            // Add merchant info length and data
-            payload += (merchantInfo.length).toString().padStart(2, '0') + merchantInfo;
-            
-            // Merchant Category Code (52)
-            payload += "5204" + merchantData.mcc;
-            
-            // Transaction Currency (53)
-            payload += "5303" + merchantData.currency;
-            
-            // Transaction Amount (54) - HANYA jika includeAmount true
-            if (includeAmount && amount > 0) {
-                const amountStr = Math.round(amount).toString();
-                payload += "54" + (amountStr.length).toString().padStart(2, '0') + amountStr;
-            }
-            
-            // Country Code (58)
-            payload += "5802" + merchantData.country;
-            
-            // Merchant Name (59)
-            const merchantName = merchantData.merchantName.substring(0, 25);
-            payload += "59" + (merchantName.length).toString().padStart(2, '0') + merchantName;
-            
-            // Merchant City (60)
-            const merchantCity = merchantData.merchantCity.substring(0, 15);
-            payload += "60" + (merchantCity.length).toString().padStart(2, '0') + merchantCity;
-            
-            // Additional Data Field Template (62) - Optional
-            // Reference Label (05)
-            const refLabel = "TRX" + Date.now().toString().slice(-6);
-            payload += "62" + (refLabel.length + 4).toString().padStart(2, '0') + "05" + (refLabel.length).toString().padStart(2, '0') + refLabel;
-            
-            // CRC (63)
-            payload += "6304";
-            
-            // Calculate CRC-16/CCITT-FALSE
-            const crc = calculateCRC(payload);
-            payload += crc;
-            
-            return payload;
-        }
-
-        // Calculate CRC-16/CCITT-FALSE
-        function calculateCRC(data) {
-            let crc = 0xFFFF;
-            for (let i = 0; i < data.length; i++) {
-                crc ^= data.charCodeAt(i) << 8;
-                for (let j = 0; j < 8; j++) {
-                    if (crc & 0x8000) {
-                        crc = (crc << 1) ^ 0x1021;
-                    } else {
-                        crc <<= 1;
-                    }
-                }
-            }
-            crc &= 0xFFFF;
-            return crc.toString(16).toUpperCase().padStart(4, '0');
-        }
-
-        // Update tampilan QRIS dan semua display
-        function updateQRISDisplay() {
+        // Update tampilan pembayaran
+        function updatePaymentDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            // Update semua display jumlah
+            // Update payment amount displays
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('total').textContent = formatRupiah(total);
+            document.getElementById('cash-total').textContent = formatRupiah(total);
             
-            // Update status text
-            const statusText = document.getElementById('status-text');
-            if (total > 0) {
-                statusText.textContent = `QRIS Siap Discan - Jumlah: ${formatRupiah(total)}`;
-                document.getElementById('payment-status').className = 'payment-status scan';
-            } else {
-                statusText.textContent = 'QRIS Siap Discan - Tambahkan item';
-                document.getElementById('payment-status').className = 'payment-status';
+            // Update payment status
+            const paymentStatus = document.getElementById('payment-status');
+            
+            let methodText = '';
+            let icon = '';
+            
+            switch(selectedPaymentMethod) {
+                case 'tunai':
+                    methodText = 'Tunai';
+                    icon = 'fa-money-bill-wave';
+                    break;
+                case 'debit':
+                    methodText = 'Kartu Debit';
+                    icon = 'fa-credit-card';
+                    break;
+                case 'transfer':
+                    methodText = 'Transfer Bank';
+                    icon = 'fa-university';
+                    break;
+                case 'e-wallet':
+                    methodText = 'E-Wallet';
+                    icon = 'fa-mobile-alt';
+                    break;
             }
             
-            // Update instruction
-            const instruction = document.getElementById('amount-instruction');
-            if (total > 0) {
-                instruction.innerHTML = `<strong>Jumlah akan terisi otomatis: ${formatRupiah(total)}</strong>`;
-            } else {
-                instruction.innerHTML = `<strong>Scan QRIS untuk melihat informasi merchant</strong>`;
-            }
+            paymentStatus.innerHTML = `
+                <i class="fas ${icon}"></i> 
+                Pembayaran ${methodText}: ${formatRupiah(total)}
+            `;
             
-            // Update QRIS QR Code jika amount berubah
-            if (currentQRISAmount !== total) {
-                generateDynamicQRIS(total);
+            // Tampilkan instruksi yang sesuai
+            document.querySelectorAll('.payment-instruction-detail').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.cash-payment').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            if (selectedPaymentMethod === 'tunai') {
+                document.getElementById('cash-instructions').classList.add('active');
+            } else {
+                document.getElementById(`${selectedPaymentMethod}-instructions`).classList.add('active');
             }
             
             return total;
         }
 
-        // Test QRIS
-        function testQRIS() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        // Filter transaksi berdasarkan waktu
+        function filterTransactionsByTimeRange(transactions, range) {
+            const now = new Date();
+            let filtered = [...transactions];
             
-            if (total > 0) {
-                showNotification(`✅ QRIS DINAMIS AKTIF! Scan QR Code untuk membayar ${formatRupiah(total)}`, false);
-                
-                // Log debug info
-                console.log("=== QRIS DEBUG INFO ===");
-                console.log("Total Amount:", formatRupiah(total));
-                console.log("NMDI: ID1025450423864");
-                console.log("Merchant: BAKSO KALDU PUSAKA");
-                console.log("Status: QRIS Dinamis Aktif");
-                
-                // Simulasi scan
-                const container = document.getElementById('qris-container');
-                container.classList.add('qris-active');
-                setTimeout(() => {
-                    container.classList.remove('qris-active');
-                }, 1000);
-                
-            } else {
-                showNotification("ℹ️ Tambahkan item ke keranjang untuk mengaktifkan QRIS Dinamis", false);
+            switch(range) {
+                case 'today':
+                    const today = now.toDateString();
+                    filtered = transactions.filter(t => {
+                        const transDate = new Date(t.date).toDateString();
+                        return transDate === today;
+                    });
+                    break;
+                    
+                case 'week':
+                    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filtered = transactions.filter(t => new Date(t.date) >= oneWeekAgo);
+                    break;
+                    
+                case 'month':
+                    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                    filtered = transactions.filter(t => new Date(t.date) >= oneMonthAgo);
+                    break;
+                    
+                case 'all':
+                default:
+                    filtered = transactions;
             }
+            
+            return filtered;
         }
 
-        // Render menu items
+        // Hitung statistik
+        function calculateStatistics(filteredTransactions) {
+            if (filteredTransactions.length === 0) {
+                return {
+                    totalIncome: 0,
+                    totalTransactions: 0,
+                    totalItems: 0,
+                    averageTransaction: 0,
+                    topItems: [],
+                    categoryData: { utama: 0, tambahan: 0, minuman: 0 },
+                    dailyRevenue: {}
+                };
+            }
+            
+            // Hitung total pendapatan
+            const totalIncome = filteredTransactions.reduce((sum, t) => sum + t.total, 0);
+            
+            // Hitung total transaksi
+            const totalTransactions = filteredTransactions.length;
+            
+            // Hitung total item terjual
+            const totalItems = filteredTransactions.reduce((sum, t) => {
+                return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+            }, 0);
+            
+            // Hitung rata-rata transaksi
+            const averageTransaction = totalIncome / totalTransactions;
+            
+            // Hitung item terlaris
+            const itemSales = {};
+            filteredTransactions.forEach(t => {
+                t.items.forEach(item => {
+                    if (!itemSales[item.name]) {
+                        itemSales[item.name] = {
+                            name: item.name,
+                            quantity: 0,
+                            revenue: 0
+                        };
+                    }
+                    itemSales[item.name].quantity += item.quantity;
+                    itemSales[item.name].revenue += item.price * item.quantity;
+                });
+            });
+            
+            const topItems = Object.values(itemSales)
+                .sort((a, b) => b.quantity - a.quantity)
+                .slice(0, 5);
+            
+            // Hitung data per kategori
+            const categoryData = { utama: 0, tambahan: 0, minuman: 0 };
+            filteredTransactions.forEach(t => {
+                t.items.forEach(item => {
+                    const menuItem = findMenuItemById(item.id);
+                    if (menuItem && menuItem.category) {
+                        categoryData[menuItem.category] += item.quantity;
+                    }
+                });
+            });
+            
+            // Hitung pendapatan per hari
+            const dailyRevenue = {};
+            filteredTransactions.forEach(t => {
+                const date = new Date(t.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+                if (!dailyRevenue[date]) {
+                    dailyRevenue[date] = 0;
+                }
+                dailyRevenue[date] += t.total;
+            });
+            
+            return {
+                totalIncome,
+                totalTransactions,
+                totalItems,
+                averageTransaction,
+                topItems,
+                categoryData,
+                dailyRevenue
+            };
+        }
+
+        // Render statistik cards
+        function renderStatistics() {
+            const filteredTransactions = filterTransactionsByTimeRange(transactions, currentTimeRange);
+            const stats = calculateStatistics(filteredTransactions);
+            
+            const statsContainer = document.getElementById('stats-cards');
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card income">
+                    <div class="stat-icon income">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-value">${formatRupiah(stats.totalIncome)}</div>
+                    <div class="stat-label">Total Pendapatan</div>
+                </div>
+                
+                <div class="stat-card transactions">
+                    <div class="stat-icon transactions">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-value">${stats.totalTransactions}</div>
+                    <div class="stat-label">Total Transaksi</div>
+                </div>
+                
+                <div class="stat-card items">
+                    <div class="stat-icon items">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="stat-value">${stats.totalItems}</div>
+                    <div class="stat-label">Item Terjual</div>
+                </div>
+                
+                <div class="stat-card average">
+                    <div class="stat-icon average">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="stat-value">${formatRupiah(stats.averageTransaction)}</div>
+                    <div class="stat-label">Rata-rata per Transaksi</div>
+                </div>
+            `;
+            
+            // Render chart pendapatan per hari
+            renderRevenueChart(stats.dailyRevenue);
+            
+            // Render chart kategori
+            renderCategoryChart(stats.categoryData);
+            
+            // Render top items
+            renderTopItems(stats.topItems);
+        }
+
+        // Render chart pendapatan per hari
+        function renderRevenueChart(dailyRevenue) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            // Destroy existing chart if exists
+            if (revenueChartInstance) {
+                revenueChartInstance.destroy();
+            }
+            
+            const labels = Object.keys(dailyRevenue);
+            const data = Object.values(dailyRevenue);
+            
+            revenueChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pendapatan (Rp)',
+                        data: data,
+                        backgroundColor: 'rgba(198, 40, 40, 0.7)',
+                        borderColor: 'rgba(198, 40, 40, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + formatNumber(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Pendapatan: ' + formatRupiah(context.raw);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render chart kategori
+        function renderCategoryChart(categoryData) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            // Destroy existing chart if exists
+            if (categoryChartInstance) {
+                categoryChartInstance.destroy();
+            }
+            
+            const labels = ['Menu Utama', 'Menu Tambahan', 'Minuman'];
+            const data = [
+                categoryData.utama || 0,
+                categoryData.tambahan || 0,
+                categoryData.minuman || 0
+            ];
+            
+            const backgroundColors = [
+                'rgba(198, 40, 40, 0.7)',
+                'rgba(33, 150, 243, 0.7)',
+                'rgba(255, 152, 0, 0.7)'
+            ];
+            
+            categoryChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} item (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render top items
+        function renderTopItems(topItems) {
+            const container = document.getElementById('top-items-list');
+            
+            if (topItems.length === 0) {
+                container.innerHTML = '<div class="empty-history">Belum ada data penjualan</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="top-items-table">
+                    <thead>
+                        <tr>
+                            <th>Peringkat</th>
+                            <th>Nama Menu</th>
+                            <th>Jumlah Terjual</th>
+                            <th>Pendapatan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            topItems.forEach((item, index) => {
+                const rank = index + 1;
+                
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <span class="rank">${rank}</span>
+                        </td>
+                        <td>${item.name}</td>
+                        <td>${item.quantity} porsi</td>
+                        <td><strong>${formatRupiah(item.revenue)}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table>`;
+            container.innerHTML = tableHTML;
+        }
+
+        // Cari item menu berdasarkan ID
+        function findMenuItemById(id) {
+            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
+            return allItems.find(item => item.id === id);
+        }
+
+        // Render menu items LENGKAP
         function renderMenuItems() {
+            console.log("Rendering menu items...");
+            
             // Menu utama
             const mainMenuContainer = document.getElementById('main-menu-items');
             mainMenuContainer.innerHTML = '';
@@ -1016,39 +1648,77 @@
                 `;
                 drinkMenuContainer.appendChild(menuItem);
             });
+            
+            console.log("Menu rendering completed");
+            console.log("Total items:", 
+                menuData.main.length + menuData.additional.length + menuData.drinks.length,
+                "items");
         }
 
-        // Setup event listeners
+        // Setup event listeners untuk tombol menu
         function setupMenuButtonEvents() {
+            // Event delegation untuk tombol + dan -
             document.addEventListener('click', function(event) {
                 const target = event.target;
                 
+                // Handle tombol +
                 if (target.closest('.increase-btn')) {
                     const button = target.closest('.increase-btn');
                     const id = parseInt(button.getAttribute('data-id'));
                     increaseQuantity(id);
                 }
                 
+                // Handle tombol -
                 else if (target.closest('.decrease-btn')) {
                     const button = target.closest('.decrease-btn');
                     const id = parseInt(button.getAttribute('data-id'));
                     decreaseQuantity(id);
                 }
+                
+                // Handle pemilihan metode pembayaran
+                else if (target.closest('.payment-method')) {
+                    const methodElement = target.closest('.payment-method');
+                    const method = methodElement.getAttribute('data-method');
+                    selectPaymentMethod(method);
+                }
             });
+        }
+
+        // Pilih metode pembayaran
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Update tampilan metode yang dipilih
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            const selectedElement = document.querySelector(`.payment-method[data-method="${method}"]`);
+            selectedElement.classList.add('active');
+            
+            updatePaymentDisplay();
+            showNotification(`Metode pembayaran dipilih: ${getPaymentMethodName(method)}`);
+        }
+
+        // Dapatkan nama metode pembayaran
+        function getPaymentMethodName(method) {
+            switch(method) {
+                case 'tunai': return 'Tunai';
+                case 'debit': return 'Kartu Debit';
+                case 'transfer': return 'Transfer Bank';
+                case 'e-wallet': return 'E-Wallet';
+                default: return method;
+            }
         }
 
         // Tambah jumlah item
         function increaseQuantity(id) {
             const itemInCart = cart.find(item => item.id === id);
-            let menuItem = null;
-            
-            // Cari item menu
-            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
-            menuItem = allItems.find(item => item.id === id);
             
             if (itemInCart) {
                 itemInCart.quantity++;
             } else {
+                const menuItem = findMenuItemById(id);
                 if (menuItem) {
                     cart.push({
                         id: menuItem.id,
@@ -1060,10 +1730,9 @@
             }
             
             updateCartDisplay();
-            const total = updateQRISDisplay();
-            
-            if (menuItem) {
-                showNotification(`✅ ${menuItem.name} ditambahkan (Total: ${formatRupiah(total)})`);
+            updatePaymentDisplay();
+            if (findMenuItemById(id)) {
+                showNotification(`${findMenuItemById(id).name} ditambahkan ke keranjang`);
             }
         }
 
@@ -1075,22 +1744,22 @@
                 const itemName = cart[itemIndex].name;
                 if (cart[itemIndex].quantity > 1) {
                     cart[itemIndex].quantity--;
-                    showNotification(`↘️ Jumlah ${itemName} dikurangi`);
+                    showNotification(`Jumlah ${itemName} dikurangi`);
                 } else {
                     cart.splice(itemIndex, 1);
-                    showNotification(`❌ ${itemName} dihapus dari keranjang`);
+                    showNotification(`${itemName} dihapus dari keranjang`);
                 }
             }
             
             updateCartDisplay();
-            updateQRISDisplay();
+            updatePaymentDisplay();
         }
 
         // Update tampilan keranjang
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
             
-            // Update jumlah di menu
+            // Update tampilan jumlah di menu
             cart.forEach(item => {
                 const quantityDisplay = document.getElementById(`quantity-${item.id}`);
                 if (quantityDisplay) {
@@ -1098,7 +1767,7 @@
                 }
             });
             
-            // Reset jumlah item yang tidak ada di keranjang
+            // Reset semua jumlah di menu ke 0 untuk item yang tidak ada di keranjang
             const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
             allItems.forEach(item => {
                 if (!cart.some(cartItem => cartItem.id === item.id)) {
@@ -1125,12 +1794,69 @@
                 });
                 cartContainer.innerHTML = cartHTML;
             }
+            
+            // Hitung total (TANPA PAJAK)
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            // Update total display
+            document.getElementById('total').textContent = formatRupiah(total);
+        }
+
+        // Tampilkan detail transaksi di modal
+        function showTransactionDetails(transaction) {
+            const modal = document.getElementById('transaction-modal');
+            const modalBody = document.getElementById('modal-body');
+            
+            let detailsHTML = `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>ID Transaksi:</strong> TRX${transaction.id}</p>
+                    <p><strong>Tanggal:</strong> ${transaction.date}</p>
+                    <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod || 'Tunai'}</p>
+                </div>
+                
+                <h4 style="color: #c62828; margin-bottom: 15px; border-bottom: 1px solid #ffcdd2; padding-bottom: 5px;">Detail Pesanan:</h4>
+            `;
+            
+            transaction.items.forEach((item, index) => {
+                detailsHTML += `
+                    <div class="transaction-detail-item">
+                        <div style="flex: 1;">
+                            <strong>${index + 1}. ${item.name}</strong>
+                        </div>
+                        <div style="margin: 0 10px;">
+                            ${item.quantity} x ${formatRupiah(item.price)}
+                        </div>
+                        <div style="font-weight: bold; color: #c62828;">
+                            ${formatRupiah(item.price * item.quantity)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            detailsHTML += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
+                        <span>TOTAL:</span>
+                        <span style="color: #c62828;">${formatRupiah(transaction.total)}</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 10px; background-color: #e8f5e9; border-radius: 5px; border-left: 4px solid #4CAF50;">
+                    <p><strong>Informasi Pembayaran:</strong></p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Transaksi Berhasil'}</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Metode: ${transaction.paymentMethod || 'Tunai'}</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Waktu: ${transaction.date}</p>
+                </div>
+            `;
+            
+            modalBody.innerHTML = detailsHTML;
+            modal.style.display = 'flex';
         }
 
         // Simpan transaksi
         function saveTransaction() {
             if (cart.length === 0) {
-                showNotification('❌ Keranjang kosong. Tambahkan item terlebih dahulu.', true);
+                showNotification('Keranjang kosong. Tambahkan item terlebih dahulu.', true);
                 return;
             }
             
@@ -1141,70 +1867,253 @@
                 date: new Date().toLocaleString('id-ID'),
                 items: [...cart.map(item => ({...item}))],
                 total,
-                paymentMethod: "QRIS DINAMIS",
-                nmdi: "ID1025450423864",
-                aoCode: "AO1",
-                merchant: "BAKSO KALDU PUSAKA",
-                status: "SUCCESS - QRIS DINAMIS"
+                paymentMethod: getPaymentMethodName(selectedPaymentMethod),
+                status: "SUCCESS"
             };
             
             transactions.unshift(transaction);
             localStorage.setItem('baksoTransactions', JSON.stringify(transactions));
             
-            showNotification(`✅ Transaksi berhasil! Total: ${formatRupiah(total)} - QRIS tercatat`, false);
+            showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)} - Metode: ${getPaymentMethodName(selectedPaymentMethod)}`, false);
             
-            // Reset semua
+            // Update semua tampilan
+            updateCartDisplay();
+            updatePaymentDisplay();
+            renderTransactions();
+            renderStatistics();
+            
+            // Reset keranjang
             cart = [];
             updateCartDisplay();
-            updateQRISDisplay();
-            
-            // Update dashboard
-            updateDashboard();
+            updatePaymentDisplay();
         }
 
-        // Update dashboard
-        function updateDashboard() {
-            const totalIncome = transactions.reduce((sum, t) => sum + t.total, 0);
-            const totalTransactions = transactions.length;
-            const totalItems = transactions.reduce((sum, t) => {
-                return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
-            }, 0);
-            const averageTransaction = totalTransactions > 0 ? totalIncome / totalTransactions : 0;
+        // Render riwayat transaksi
+        function renderTransactions() {
+            const container = document.getElementById('transactions-container');
             
-            const statsContainer = document.getElementById('stats-cards');
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div style="font-size: 2.5rem; color: #4CAF50; margin-bottom: 15px;">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-value">${formatRupiah(totalIncome)}</div>
-                    <div class="stat-label">Total Pendapatan</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div style="font-size: 2.5rem; color: #2196F3; margin-bottom: 15px;">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <div class="stat-value">${totalTransactions}</div>
-                    <div class="stat-label">Total Transaksi</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div style="font-size: 2.5rem; color: #FF9800; margin-bottom: 15px;">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <div class="stat-value">${totalItems}</div>
-                    <div class="stat-label">Item Terjual</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div style="font-size: 2.5rem; color: #9C27B0; margin-bottom: 15px;">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <div class="stat-value">${formatRupiah(averageTransaction)}</div>
-                    <div class="stat-label">Rata-rata per Transaksi</div>
-                </div>
+            if (transactions.length === 0) {
+                container.innerHTML = '<div class="empty-history">Belum ada transaksi yang tersimpan.</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal/Waktu</th>
+                            <th>Detail Pesanan</th>
+                            <th>Jumlah Item</th>
+                            <th>Total</th>
+                            <th>Metode</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
+            
+            transactions.forEach((transaction, index) => {
+                const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                
+                let orderSummary = '';
+                transaction.items.slice(0, 2).forEach(item => {
+                    orderSummary += `${item.quantity}x ${item.name}<br>`;
+                });
+                
+                if (transaction.items.length > 2) {
+                    orderSummary += `+${transaction.items.length - 2} item lainnya`;
+                }
+                
+                tableHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${transaction.date}</td>
+                        <td class="transaction-details">
+                            <div style="font-size: 0.9rem;">
+                                ${orderSummary}
+                            </div>
+                        </td>
+                        <td>${itemCount} item</td>
+                        <td><strong>${formatRupiah(transaction.total)}</strong></td>
+                        <td>
+                            <span style="color: #2196F3; font-weight: bold;">
+                                <i class="fas ${transaction.paymentMethod === 'Tunai' ? 'fa-money-bill-wave' : transaction.paymentMethod === 'Kartu Debit' ? 'fa-credit-card' : transaction.paymentMethod === 'Transfer Bank' ? 'fa-university' : 'fa-mobile-alt'}"></i> ${transaction.paymentMethod || 'Tunai'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="view-details-btn" data-transaction='${JSON.stringify(transaction)}'>
+                                <i class="fas fa-eye"></i> Lihat Detail
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+            
+            tableHTML += `
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f9f9f9; font-weight: bold;">
+                        <td colspan="4" style="text-align: right;">TOTAL KESELURUHAN:</td>
+                        <td colspan="3">${formatRupiah(overallTotal)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+            
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const transactionData = JSON.parse(this.getAttribute('data-transaction'));
+                    showTransactionDetails(transactionData);
+                });
+            });
+        }
+
+        // Ekspor ke PDF
+        function exportToPDF() {
+            if (transactions.length === 0) {
+                showNotification('Tidak ada data transaksi untuk diekspor.', true);
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(18);
+                doc.setTextColor(198, 40, 40);
+                doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA", 20, 20);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`, 20, 30);
+                doc.text(`Total Transaksi: ${transactions.length}`, 20, 37);
+                
+                const headers = [['No', 'Tanggal', 'Detail Pesanan', 'Jml Item', 'Total', 'Metode']];
+                const data = transactions.map((transaction, index) => {
+                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                    const orderDetails = transaction.items.map(item => 
+                        `${item.quantity}x ${item.name}`
+                    ).join(', ');
+                    
+                    return [
+                        index + 1,
+                        transaction.date,
+                        orderDetails.length > 50 ? orderDetails.substring(0, 47) + '...' : orderDetails,
+                        `${itemCount} item`,
+                        formatRupiah(transaction.total),
+                        transaction.paymentMethod || 'Tunai'
+                    ];
+                });
+                
+                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+                
+                data.push([
+                    '',
+                    'TOTAL KESELURUHAN',
+                    '',
+                    '',
+                    formatRupiah(overallTotal),
+                    ''
+                ]);
+                
+                doc.autoTable({
+                    head: headers,
+                    body: data,
+                    startY: 50,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [198, 40, 40],
+                        textColor: [255, 255, 255],
+                        fontSize: 9
+                    },
+                    bodyStyles: { fontSize: 8 },
+                    footStyles: { 
+                        fillColor: [255, 205, 210],
+                        textColor: [0, 0, 0],
+                        fontSize: 9,
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        2: { cellWidth: 60 }
+                    },
+                    didDrawPage: function(data) {
+                        doc.setFontSize(8);
+                        doc.setTextColor(128, 128, 128);
+                        doc.text('© 2024 Bakso Kaldu Pusaka - Sistem Penjualan', data.settings.margin.left, doc.internal.pageSize.height - 10);
+                    }
+                });
+                
+                doc.save(`Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.pdf`);
+                showNotification('Laporan PDF berhasil diekspor!');
+            } catch (error) {
+                console.error('Error exporting to PDF:', error);
+                showNotification('Terjadi kesalahan saat mengekspor PDF', true);
+            }
+        }
+
+        // Ekspor ke Excel
+        function exportToExcel() {
+            if (transactions.length === 0) {
+                showNotification('Tidak ada data transaksi untuk diekspor.', true);
+                return;
+            }
+            
+            try {
+                const data = [];
+                
+                data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA']);
+                data.push([`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`]);
+                data.push([`Total Transaksi: ${transactions.length}`]);
+                data.push([]);
+                data.push(['No', 'Tanggal/Waktu', 'Detail Pesanan', 'Jumlah Item', 'Total', 'Metode']);
+                
+                transactions.forEach((transaction, index) => {
+                    const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                    const orderDetails = transaction.items.map(item => 
+                        `${item.quantity}x ${item.name}`
+                    ).join(', ');
+                    
+                    data.push([
+                        index + 1,
+                        transaction.date,
+                        orderDetails,
+                        `${itemCount} item`,
+                        transaction.total,
+                        transaction.paymentMethod || 'Tunai'
+                    ]);
+                });
+                
+                const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+                
+                data.push([]);
+                data.push(['', 'TOTAL KESELURUHAN', '', '', overallTotal, '']);
+                
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                
+                const wscols = [
+                    {wch: 5},
+                    {wch: 25},
+                    {wch: 50},
+                    {wch: 12},
+                    {wch: 15},
+                    {wch: 12}
+                ];
+                ws['!cols'] = wscols;
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
+                
+                XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.xlsx`);
+                showNotification('Laporan Excel berhasil diekspor!');
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('Terjadi kesalahan saat mengekspor Excel', true);
+            }
         }
 
         // Reset pesanan
@@ -1214,23 +2123,34 @@
                 return;
             }
             
-            if (confirm('Reset pesanan? Semua item akan dihapus.')) {
+            if (confirm('Apakah Anda yakin ingin mereset pesanan? Semua item di keranjang akan dihapus.')) {
                 cart = [];
                 updateCartDisplay();
-                updateQRISDisplay();
+                updatePaymentDisplay();
                 showNotification('Pesanan telah direset');
+            }
+        }
+
+        // Reset semua data
+        function resetAllData() {
+            if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
+                cart = [];
+                transactions = [];
+                localStorage.removeItem('baksoTransactions');
+                updateCartDisplay();
+                updatePaymentDisplay();
+                renderTransactions();
+                renderStatistics();
+                showNotification('Semua data telah direset');
             }
         }
 
         // Inisialisasi aplikasi
         function initApp() {
-            console.log("Memulai sistem Bakso Kaldu Pusaka dengan QRIS DINAMIS...");
+            console.log("Initializing Bakso Kaldu Pusaka POS System...");
             
             try {
-                // Generate initial QRIS
-                generateDynamicQRIS(0);
-                
-                // Render menu
+                // Render menu LENGKAP
                 renderMenuItems();
                 
                 // Setup event listeners
@@ -1238,46 +2158,65 @@
                 
                 // Update displays
                 updateCartDisplay();
-                updateQRISDisplay();
-                updateDashboard();
+                updatePaymentDisplay();
+                renderTransactions();
+                renderStatistics();
                 updateDateTime();
                 
-                // Setup button events
-                document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
-                document.getElementById('export-pdf').addEventListener('click', () => {
-                    showNotification("Fitur ekspor PDF dalam pengembangan", false);
-                });
-                document.getElementById('export-excel').addEventListener('click', () => {
-                    showNotification("Fitur ekspor Excel dalam pengembangan", false);
-                });
-                document.getElementById('reset-btn').addEventListener('click', resetOrder);
-                document.getElementById('test-qr-btn').addEventListener('click', testQRIS);
+                console.log("Application initialized successfully");
+                console.log("Menu items loaded:", 
+                    menuData.main.length, "main items,",
+                    menuData.additional.length, "additional items,",
+                    menuData.drinks.length, "drink items"
+                );
                 
                 // Update waktu setiap detik
                 setInterval(updateDateTime, 1000);
                 
-                // Notifikasi startup
+                // Event listeners untuk tombol utama
+                document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
+                document.getElementById('export-pdf').addEventListener('click', exportToPDF);
+                document.getElementById('export-excel').addEventListener('click', exportToExcel);
+                document.getElementById('reset-btn').addEventListener('click', resetOrder);
+                document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
+                
+                // Event listener untuk modal
+                document.getElementById('close-modal').addEventListener('click', function() {
+                    document.getElementById('transaction-modal').style.display = 'none';
+                });
+                
+                // Tutup modal saat klik di luar
+                window.addEventListener('click', function(event) {
+                    const modal = document.getElementById('transaction-modal');
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                // Event listeners untuk filter waktu
+                document.querySelectorAll('.time-filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        currentTimeRange = this.getAttribute('data-range');
+                        renderStatistics();
+                    });
+                });
+                
+                // Tampilkan notifikasi startup
                 setTimeout(() => {
-                    showNotification("✅ Sistem QRIS DINAMIS siap! Tambahkan item untuk mulai");
+                    showNotification(`Sistem Bakso Kaldu Pusaka siap! ${menuData.main.length + menuData.additional.length + menuData.drinks.length} item menu tersedia.`);
                 }, 1000);
                 
-                console.log("Sistem berhasil diinisialisasi");
-                
             } catch (error) {
-                console.error("Error inisialisasi:", error);
-                showNotification("Error memulai sistem: " + error.message, true);
+                console.error("Error initializing app:", error);
+                showNotification("Terjadi error saat inisialisasi aplikasi: " + error.message, true);
             }
         }
 
-        // Jalankan saat halaman dimuat
+        // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
-        
-        // Pastikan QR Code library dimuat
-        if (typeof QRCode === 'undefined') {
-            console.error("QRCode library tidak dimuat!");
-            document.getElementById('qris-qrcode').innerHTML = 
-                '<div style="color: red; text-align: center; padding: 20px;">Error: QR Code library gagal dimuat</div>';
-        }
     </script>
 </body>
 </html>
