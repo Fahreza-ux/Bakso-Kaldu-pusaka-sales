@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakso Kaldu Pusaka - Sistem Penjualan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo-title i {
+            font-size: 2.5rem;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .menu-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .cart-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .section-title {
+            color: #c62828;
+            border-bottom: 2px solid #ffcdd2;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.3rem;
+        }
+        
+        .menu-category {
+            margin-bottom: 30px;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .menu-item-info {
+            flex: 1;
+        }
+        
+        .menu-item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-price {
+            font-weight: 700;
+            color: #c62828;
+            font-size: 1.2rem;
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        .menu-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+        }
+        
+        .quantity-btn {
+            background-color: #ffcdd2;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            color: #c62828;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .quantity-btn:hover {
+            background-color: #ef9a9a;
+        }
+        
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .cart-item-name {
+            flex: 1;
+        }
+        
+        .cart-item-quantity {
+            font-weight: 600;
+            margin: 0 10px;
+        }
+        
+        .cart-item-price {
+            font-weight: 600;
+            color: #c62828;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .cart-total {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .total-amount {
+            font-weight: 800;
+            color: #c62828;
+            font-size: 1.5rem;
+            border-top: 2px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #c62828;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+        }
+        
+        .btn-export {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-reset {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #F57C00;
+            transform: translateY(-2px);
+        }
+        
+        .btn i {
+            font-size: 1.2rem;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .export-options .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .transactions-history {
+            margin-top: 40px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .transactions-table th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            color: #c62828;
+        }
+        
+        .transactions-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transactions-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .date-time {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-title">
+                <i class="fas fa-utensils"></i>
+                <div>
+                    <h1>BAKSO KALDU PUSAKA</h1>
+                    <p class="subtitle">Sistem Penghitung Data Penjualan</p>
+                </div>
+            </div>
+            <p class="date-time" id="currentDateTime">Minggu, 3 Maret 2024 10:30:15</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="menu-section">
+                <h2 class="section-title"><i class="fas fa-list"></i> Menu Bakso Kaldu Pusaka</h2>
+                
+                <div class="menu-category">
+                    <h3>Menu Utama</h3>
+                    <div id="main-menu-items">
+                        <!-- Menu items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="menu-category">
+                    <h3>Menu Tambahan</h3>
+                    <div id="additional-menu-items">
+                        <!-- Menu items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="menu-category">
+                    <h3>Minuman</h3>
+                    <div id="drink-menu-items">
+                        <!-- Menu items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cart-section">
+                <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Keranjang Pesanan</h2>
+                
+                <div class="cart-items" id="cart-items-container">
+                    <!-- Cart items will be populated by JavaScript -->
+                </div>
+                
+                <div class="cart-total">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">Rp 0</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Pajak (10%):</span>
+                        <span id="tax">Rp 0</span>
+                    </div>
+                    <div class="total-row total-amount">
+                        <span>Total:</span>
+                        <span id="total">Rp 0</span>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="checkout-btn">
+                        <i class="fas fa-cash-register"></i> Simpan Transaksi
+                    </button>
+                    
+                    <div class="export-options">
+                        <button class="btn btn-export" id="export-pdf">
+                            <i class="fas fa-file-pdf"></i> Ekspor PDF
+                        </button>
+                        <button class="btn btn-export" id="export-excel">
+                            <i class="fas fa-file-excel"></i> Ekspor Excel
+                        </button>
+                    </div>
+                    
+                    <button class="btn btn-reset" id="reset-btn">
+                        <i class="fas fa-redo"></i> Reset Pesanan
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="transactions-history">
+            <h2 class="section-title"><i class="fas fa-history"></i> Riwayat Transaksi</h2>
+            <div id="transactions-container">
+                <!-- Transactions will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan. Semua hak dilindungi.</p>
+            <p>Versi 1.0 | Terakhir diperbarui: Maret 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        // Data menu dari gambar yang diberikan
+        const menuData = {
+            main: [
+                { id: 1, name: "Bakso daging", price: 25000 },
+                { id: 2, name: "Bakso urat", price: 30000 },
+                { id: 3, name: "Daging brisket bihun/kwetiaw", price: 35000 },
+                { id: 4, name: "Bakso daging special", price: 40000 },
+                { id: 5, name: "Bakso urat special", price: 40000 }
+            ],
+            additional: [
+                { id: 6, name: "Kerupuk kaleng", price: 3000 },
+                { id: 7, name: "Nasi", price: 5000 },
+                { id: 8, name: "Tetelan", price: 10000 },
+                { id: 9, name: "Urat sapi / koyor", price: 25000 }
+            ],
+            drinks: [
+                { id: 10, name: "Es teh tawar", price: 4000 },
+                { id: 11, name: "Teh tawar hangat", price: 4000 },
+                { id: 12, name: "Mineral", price: 5000 },
+                { id: 13, name: "Es teh manis", price: 6000 },
+                { id: 14, name: "Teh manis hangat", price: 6000 },
+                { id: 15, name: "Es jeruk", price: 8000 },
+                { id: 16, name: "Jeruk hangat", price: 8000 },
+                { id: 17, name: "Teh botol", price: 8000 }
+            ]
+        };
+
+        // State aplikasi
+        let cart = [];
+        let transactions = JSON.parse(localStorage.getItem('baksoTransactions')) || [];
+
+        // Format angka ke Rupiah
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Update tanggal dan waktu
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options);
+        }
+
+        // Render menu items
+        function renderMenuItems() {
+            // Menu utama
+            const mainMenuContainer = document.getElementById('main-menu-items');
+            mainMenuContainer.innerHTML = '';
+            
+            menuData.main.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <div class="menu-item-info">
+                        <div class="menu-item-name">${item.name}</div>
+                    </div>
+                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                    <div class="menu-item-controls">
+                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
+                        <span class="quantity-display" id="quantity-${item.id}">0</span>
+                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
+                    </div>
+                `;
+                mainMenuContainer.appendChild(menuItem);
+            });
+            
+            // Menu tambahan
+            const additionalMenuContainer = document.getElementById('additional-menu-items');
+            additionalMenuContainer.innerHTML = '';
+            
+            menuData.additional.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <div class="menu-item-info">
+                        <div class="menu-item-name">${item.name}</div>
+                    </div>
+                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                    <div class="menu-item-controls">
+                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
+                        <span class="quantity-display" id="quantity-${item.id}">0</span>
+                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
+                    </div>
+                `;
+                additionalMenuContainer.appendChild(menuItem);
+            });
+            
+            // Minuman
+            const drinkMenuContainer = document.getElementById('drink-menu-items');
+            drinkMenuContainer.innerHTML = '';
+            
+            menuData.drinks.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <div class="menu-item-info">
+                        <div class="menu-item-name">${item.name}</div>
+                    </div>
+                    <div class="menu-item-price">${formatRupiah(item.price)}</div>
+                    <div class="menu-item-controls">
+                        <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
+                        <span class="quantity-display" id="quantity-${item.id}">0</span>
+                        <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
+                    </div>
+                `;
+                drinkMenuContainer.appendChild(menuItem);
+            });
+        }
+
+        // Cari item menu berdasarkan ID
+        function findMenuItem(id) {
+            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
+            return allItems.find(item => item.id === id);
+        }
+
+        // Tambah jumlah item
+        function increaseQuantity(id) {
+            const itemInCart = cart.find(item => item.id === id);
+            
+            if (itemInCart) {
+                itemInCart.quantity++;
+            } else {
+                const menuItem = findMenuItem(id);
+                cart.push({
+                    id: menuItem.id,
+                    name: menuItem.name,
+                    price: menuItem.price,
+                    quantity: 1
+                });
+            }
+            
+            updateCartDisplay();
+        }
+
+        // Kurangi jumlah item
+        function decreaseQuantity(id) {
+            const itemIndex = cart.findIndex(item => item.id === id);
+            
+            if (itemIndex !== -1) {
+                if (cart[itemIndex].quantity > 1) {
+                    cart[itemIndex].quantity--;
+                } else {
+                    cart.splice(itemIndex, 1);
+                }
+            }
+            
+            updateCartDisplay();
+        }
+
+              // Update tampilan keranjang
+        function updateCartDisplay() {
+            const cartContainer = document.getElementById('cart-items-container');
+            
+            // Update tampilan jumlah di menu
+            cart.forEach(item => {
+                const quantityDisplay = document.getElementById(`quantity-${item.id}`);
+                if (quantityDisplay) {
+                    quantityDisplay.textContent = item.quantity;
+                }
+            });
+            
+            // Reset semua jumlah di menu ke 0 untuk item yang tidak ada di keranjang
+            const allItems = [...menuData.main, ...menuData.additional, ...menuData.drinks];
+            allItems.forEach(item => {
+                if (!cart.some(cartItem => cartItem.id === item.id)) {
+                    const quantityDisplay = document.getElementById(`quantity-${item.id}`);
+                    if (quantityDisplay) {
+                        quantityDisplay.textContent = '0';
+                    }
+                }
+            });
+            
+            // Update tampilan keranjang
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<div class="empty-cart">Keranjang kosong. Tambahkan item dari menu.</div>';
+            } else {
+                cartContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-quantity">${item.quantity}x</div>
+                        <div class="cart-item-price">${formatRupiah(item.price * item.quantity)}</div>
+                    `;
+                    cartContainer.appendChild(cartItem);
+                });
+            }
+            
+            // Hitung total
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = Math.round(subtotal * 0.1); // Pajak 10%
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = formatRupiah(subtotal);
+            document.getElementById('tax').textContent = formatRupiah(tax);
+            document.getElementById('total').textContent = formatRupiah(total);
+        }
+
+        // Simpan transaksi
+        function saveTransaction() {
+            if (cart.length === 0) {
+                alert('Keranjang kosong. Tambahkan item terlebih dahulu.');
+                return;
+            }
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = Math.round(subtotal * 0.1);
+            const total = subtotal + tax;
+            
+            const transaction = {
+                id: Date.now(),
+                date: new Date().toLocaleString('id-ID'),
+                items: [...cart],
+                subtotal,
+                tax,
+                total
+            };
+            
+            transactions.unshift(transaction);
+            localStorage.setItem('baksoTransactions', JSON.stringify(transactions));
+            
+            // Reset keranjang
+            cart = [];
+            updateCartDisplay();
+            
+            // Update riwayat transaksi
+            renderTransactions();
+            
+            alert(`Transaksi berhasil disimpan!\nTotal: ${formatRupiah(total)}`);
+        }
+
+        // Render riwayat transaksi
+        function renderTransactions() {
+            const container = document.getElementById('transactions-container');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<div class="empty-history">Belum ada transaksi yang tersimpan.</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal/Waktu</th>
+                            <th>Jumlah Item</th>
+                            <th>Subtotal</th>
+                            <th>Pajak</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+          transactions.forEach((transaction, index) => {
+                const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                
+                tableHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${transaction.date}</td>
+                        <td>${itemCount} item</td>
+                        <td>${formatRupiah(transaction.subtotal)}</td>
+                        <td>${formatRupiah(transaction.tax)}</td>
+                        <td><strong>${formatRupiah(transaction.total)}</strong></td>
+                    </tr>
+          // Data transaksi
+            transactions.forEach((transaction, index) => {
+                const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
+                data.push([
+                    index + 1,
+                    transaction.date,
+                    `${itemCount} item`,
+                    transaction.subtotal,
+                    transaction.tax,
+                    transaction.total
+                ]);
+            });
+            
+            // Total keseluruhan
+            const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
+            const overallSubtotal = transactions.reduce((sum, transaction) => sum + transaction.subtotal, 0);
+            const overallTax = transactions.reduce((sum, transaction) => sum + transaction.tax, 0);
+            
+            data.push([]);
+            data.push(['', 'TOTAL KESELURUHAN', '', overallSubtotal, overallTax, overallTotal]);
+            
+            // Buat worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Format kolom
+            const wscols = [
+                {wch: 5},  // No
+                {wch: 25}, // Tanggal
+                {wch: 12}, // Jumlah Item
+                {wch: 15}, // Subtotal
+                {wch: 15}, // Pajak
+                {wch: 15}  // Total
+            ];
+            ws['!cols'] = wscols;
+            
+            // Buat workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
+            
+            // Ekspor ke file
+            XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        // Reset pesanan
+        function resetOrder() {
+            if (cart.length === 0) {
+                alert('Tidak ada pesanan untuk direset.');
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin mereset pesanan? Semua item di keranjang akan dihapus.')) {
+                cart = [];
+                updateCartDisplay();
+            }
+        }
+
+        // Inisialisasi aplikasi
+        function initApp() {
+            renderMenuItems();
+            updateCartDisplay();
+            renderTransactions();
+            updateDateTime();
+            
+            // Update waktu setiap detik
+            setInterval(updateDateTime, 1000);
+            
+            // Event listeners
+            document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
+            document.getElementById('export-pdf').addEventListener('click', exportToPDF);
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+            document.getElementById('reset-btn').addEventListener('click', resetOrder);
+        }
+
+        // Jalankan aplikasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
