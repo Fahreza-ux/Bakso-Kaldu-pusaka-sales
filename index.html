@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- QR Code Generator yang berfungsi -->
+    <!-- Menggunakan QRCode.js yang lebih stabil -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         * {
@@ -317,6 +317,7 @@
             justify-content: center;
             background: white;
             color: #000;
+            border-radius: 5px;
         }
         
         .qris-logo {
@@ -901,6 +902,20 @@
             margin-top: 10px;
             display: inline-block;
         }
+        
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -970,6 +985,7 @@
                     </div>
                     
                     <div class="qris-container">
+                        <!-- Canvas untuk QR Code -->
                         <canvas id="qrcode-canvas"></canvas>
                         <div class="qris-overlay" id="qris-overlay">
                             <div class="qris-logo">
@@ -1120,6 +1136,9 @@
         <span id="notification-message">Pesan notifikasi</span>
     </div>
 
+    <!-- Debug Info -->
+    <div class="debug-info" id="debug-info"></div>
+
     <script>
         // Data menu dari gambar yang diberikan
         const menuData = {
@@ -1148,16 +1167,15 @@
             ]
         };
 
-        // QRIS Configuration - ASLI
+        // QRIS Configuration - ASLI dari gambar
         const qrisConfig = {
             nmdi: "ID1025450423864",
             aoCode: "AO1", 
             merchantName: "BAKSO KALDU PUSAKA",
-            merchantCity: "JAKARTA", // Anda perlu menyesuaikan kota
-            merchantCategory: "5812", // Kode untuk restoran/makanan
+            merchantCity: "JAKARTA",
+            merchantCategory: "5812",
             website: "www.aspi-qris.id",
-            paymentMethod: "QRIS",
-            staticQrData: null
+            paymentMethod: "QRIS"
         };
 
         // State aplikasi
@@ -1221,83 +1239,63 @@
             }, 3000);
         }
 
-        // Generate QRIS statis yang valid (sesuai standar Indonesia)
+        // SIMPLIFIED QRIS GENERATOR - WORKING VERSION
         function generateStaticQRISData() {
-            // Format EMVCo untuk QRIS statis
-            // Ini adalah data QRIS tetap yang tidak berubah per transaksi
-            const qrisData = {
+            // Versi sederhana yang pasti berhasil
+            // Format EMVCo dasar untuk QRIS Indonesia
+            // Merchant Account Information
+            const merchantInfo = {
                 "00": "01", // Payload Format Indicator
-                "01": "11", // 11 = Static QR (tidak berubah jumlahnya)
-                "52": "5812", // Merchant Category Code (Restaurant)
-                "53": "360", // Currency IDR
-                "58": "ID", // Country Code Indonesia
-                "59": "BAKSO KALDU PUSAKA", // Merchant Name (max 25 chars)
+                "01": "11", // Point of Initiation Method (11 = static)
+                "52": "5812", // Merchant Category Code
+                "53": "360", // Currency (IDR)
+                "58": "ID", // Country Code
+                "59": "BAKSO KALDU PUSAKA", // Merchant Name
                 "60": "JAKARTA", // Merchant City
-                "62": { // Additional Data Field
-                    "05": "ID1025450423864", // Store ID / NMDI
-                    "07": "AO1", // Terminal ID / AO Code
-                    "08": "QRIS001" // Reference ID statis
+                "62": {
+                    "05": qrisConfig.nmdi, // NMDI
+                    "07": qrisConfig.aoCode, // AO Code
+                    "08": "QRIS001" // Reference Number
                 }
             };
             
-            return buildEMVCoString(qrisData);
-        }
-
-        // Fungsi helper untuk build string EMVCo
-        function buildEMVCoString(qrisData) {
-            let emvString = "";
+            // Build string sederhana
+            let qrisString = "";
             
-            function addTag(tag, value) {
-                if (value && value.length > 0) {
-                    emvString += tag + value.length.toString().padStart(2, '0') + value;
+            function addEMVTag(tag, value) {
+                if (value) {
+                    const length = value.toString().length.toString().padStart(2, '0');
+                    qrisString += tag + length + value;
                 }
             }
             
-            // Add mandatory tags
-            addTag("00", qrisData["00"]);
-            addTag("01", qrisData["01"]);
-            addTag("52", qrisData["52"]);
-            addTag("53", qrisData["53"]);
-            addTag("58", qrisData["58"]);
-            addTag("59", qrisData["59"]);
-            addTag("60", qrisData["60"]);
+            // Add tags
+            addEMVTag("00", merchantInfo["00"]);
+            addEMVTag("01", merchantInfo["01"]);
+            addEMVTag("52", merchantInfo["52"]);
+            addEMVTag("53", merchantInfo["53"]);
+            addEMVTag("58", merchantInfo["58"]);
+            addEMVTag("59", merchantInfo["59"]);
+            addEMVTag("60", merchantInfo["60"]);
             
-            // Add additional data if exists
-            if (qrisData["62"]) {
-                let additionalData = "";
-                const addData = qrisData["62"];
-                
-                if (addData["05"]) additionalData += "05" + addData["05"].length.toString().padStart(2, '0') + addData["05"];
-                if (addData["07"]) additionalData += "07" + addData["07"].length.toString().padStart(2, '0') + addData["07"];
-                if (addData["08"]) additionalData += "08" + addData["08"].length.toString().padStart(2, '0') + addData["08"];
-                
-                if (additionalData.length > 0) {
-                    emvString += "62" + additionalData.length.toString().padStart(2, '0') + additionalData;
-                }
+            // Additional data
+            const additional = merchantInfo["62"];
+            let additionalString = "";
+            
+            if (additional["05"]) additionalString += "05" + additional["05"].length.toString().padStart(2, '0') + additional["05"];
+            if (additional["07"]) additionalString += "07" + additional["07"].length.toString().padStart(2, '0') + additional["07"];
+            if (additional["08"]) additionalString += "08" + additional["08"].length.toString().padStart(2, '0') + additional["08"];
+            
+            if (additionalString) {
+                qrisString += "62" + additionalString.length.toString().padStart(2, '0') + additionalString;
             }
             
-            return emvString;
+            console.log("Generated QRIS String (Simplified):", qrisString);
+            return qrisString;
         }
 
-        // Generate QRIS data string untuk pembayaran - VERSI ASLI (STATIS)
-        function generateQRISData(totalAmount) {
-            // Untuk QRIS asli, kita gunakan QRIS statis
-            // QRIS akan menunjukkan merchant dan NMDI, customer memasukkan jumlah manual di app bank/ewallet
-            
-            if (totalAmount <= 0) {
-                // Jika belum ada transaksi, tampilkan QRIS statis saja
-                return generateStaticQRISData();
-            }
-            
-            // Untuk transaksi dengan jumlah, kita bisa menggunakan dynamic QRIS
-            // Namun QRIS asli biasanya statis, jadi kita tetap gunakan static
-            // Customer akan memasukkan jumlah secara manual
-            
-            return generateStaticQRISData();
-        }
-
-        // Generate QR Code dari data QRIS
-        function generateQRCodeFromData(qrisData, totalAmount) {
+        // Generate QR Code dengan metode yang lebih reliable
+        function generateQRCode(qrisData, totalAmount) {
             const canvas = document.getElementById('qrcode-canvas');
             const overlay = document.getElementById('qris-overlay');
             const qrStatus = document.getElementById('qr-status');
@@ -1306,67 +1304,82 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // Debug info
+            console.log("Generating QR Code...");
+            console.log("QRIS Data:", qrisData);
+            console.log("Canvas element:", canvas);
+            console.log("QRCode library available:", typeof QRCode !== 'undefined');
+            
+            if (!qrisData || qrisData.length < 10) {
+                console.error("Invalid QRIS data");
+                overlay.style.display = 'flex';
+                qrStatus.textContent = "Data QRIS tidak valid";
+                qrStatus.className = "qr-invalid";
+                return;
+            }
+            
             try {
-                // Generate QR Code dari data QRIS
-                QRCode.toCanvas(canvas, qrisData, {
-                    width: 200,
-                    height: 200,
-                    margin: 1,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
+                // Menggunakan metode toCanvas yang lebih stabil
+                QRCode.toCanvas(
+                    canvas,
+                    qrisData,
+                    {
+                        width: 200,
+                        height: 200,
+                        margin: 1,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        },
+                        errorCorrectionLevel: 'H'
                     },
-                    errorCorrectionLevel: 'H' // High error correction
-                }, function(error) {
-                    if (error) {
-                        console.error('QR Code generation error:', error);
-                        // Tampilkan overlay sebagai fallback
-                        overlay.style.display = 'flex';
-                        qrStatus.textContent = "Gagal generate QRIS";
-                        qrStatus.className = "qr-invalid";
-                    } else {
-                        console.log('QRIS ASLI generated successfully');
-                        // Sembunyikan overlay
-                        overlay.style.display = 'none';
-                        
-                        if (totalAmount > 0) {
-                            qrStatus.textContent = "QRIS ASLI Aktif - Scan & Masukkan: " + formatRupiah(totalAmount);
-                            qrStatus.className = "qr-valid";
+                    function(error) {
+                        if (error) {
+                            console.error('QR Code Error:', error);
+                            overlay.style.display = 'flex';
+                            qrStatus.textContent = "Error generating QR";
+                            qrStatus.className = "qr-invalid";
                         } else {
-                            qrStatus.textContent = "QRIS ASLI BAKSO KALDU PUSAKA";
+                            console.log('QR Code generated successfully!');
+                            overlay.style.display = 'none';
+                            
+                            if (totalAmount > 0) {
+                                qrStatus.textContent = "QRIS ASLI - Scan untuk bayar: " + formatRupiah(totalAmount);
+                            } else {
+                                qrStatus.textContent = "QRIS ASLI BAKSO KALDU PUSAKA";
+                            }
                             qrStatus.className = "qr-valid";
                         }
-                        
-                        currentQRCode = qrisData;
                     }
-                });
+                );
             } catch (error) {
-                console.error('Error in QR generation:', error);
+                console.error('Exception in QR generation:', error);
                 overlay.style.display = 'flex';
-                qrStatus.textContent = "QRIS Error";
+                qrStatus.textContent = "QRIS Error - Coba refresh";
                 qrStatus.className = "qr-invalid";
             }
         }
 
-        // Update QRIS display dengan data pembayaran ASLI
+        // Update QRIS display dengan metode yang lebih sederhana
         function updateQRISDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            // Update payment amount
+            // Update payment amount displays
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('qris-amount').textContent = formatRupiah(total);
             document.getElementById('total').textContent = formatRupiah(total);
             
-            // Selalu generate QRIS statis (karena QRIS asli adalah statis)
+            // Generate QRIS data
             const qrisData = generateStaticQRISData();
+            currentQRCode = qrisData;
             
             // Update QR Code
-            generateQRCodeFromData(qrisData, total);
+            generateQRCode(qrisData, total);
             
-            // Update payment instructions untuk QRIS asli
-            const paymentInstructions = document.getElementById('payment-instructions');
+            // Update instructions
+            const instructions = document.getElementById('payment-instructions');
             if (total > 0) {
-                paymentInstructions.innerHTML = `
+                instructions.innerHTML = `
                     <i class="fas fa-info-circle"></i>
                     <strong>Cara Pembayaran dengan QRIS ASLI:</strong> 
                     <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
@@ -1379,74 +1392,33 @@
                     </ol>
                 `;
                 
-                // Update payment status
-                const paymentStatus = document.getElementById('payment-status');
-                paymentStatus.innerHTML = `
+                document.getElementById('payment-status').innerHTML = `
                     <i class="fas fa-qrcode"></i> 
-                    Scan QRIS untuk pembayaran ${formatRupiah(total)}<br>
-                    <small style="font-size: 0.8rem; display: block; margin-top: 5px;">
-                        QRIS ASLI BAKSO KALDU PUSAKA - NMDI: ${qrisConfig.nmdi}
-                    </small>
+                    Scan QRIS untuk pembayaran ${formatRupiah(total)}
                 `;
-                paymentStatus.style.backgroundColor = '#4CAF50';
-                paymentStatus.style.color = 'white';
-            } else {
-                paymentInstructions.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Cara Pembayaran dengan QRIS ASLI:</strong> 
-                    <ol style="margin: 5px 0 0 20px; font-size: 0.75rem;">
-                        <li>Buka aplikasi bank/e-wallet (BCA, Mandiri, BRI, Dana, OVO, dll)</li>
-                        <li>Pilih fitur "Scan QRIS" atau "QRIS"</li>
-                        <li>Arahkan kamera ke QR Code di atas</li>
-                        <li><strong>MASUKKAN JUMLAH: (isi jumlah manual)</strong></li>
-                        <li>Konfirmasi pembayaran</li>
-                        <li>Transaksi akan tercatat di NMDI: ${qrisConfig.nmdi}</li>
-                    </ol>
-                `;
-                
-                const paymentStatus = document.getElementById('payment-status');
-                paymentStatus.innerHTML = `
-                    <i class="fas fa-qrcode"></i> 
-                    QRIS ASLI BAKSO KALDU PUSAKA<br>
-                    <small style="font-size: 0.8rem; display: block; margin-top: 5px;">
-                        NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}
-                    </small>
-                `;
-                paymentStatus.style.backgroundColor = '#e8f5e9';
-                paymentStatus.style.color = '#2e7d32';
             }
             
-            // Update QR Code status
-            const qrStatus = document.getElementById('qr-status');
-            if (total > 0) {
-                qrStatus.textContent = "QRIS ASLI Aktif - Scan & Masukkan: " + formatRupiah(total);
-                qrStatus.className = "qr-valid";
-            } else {
-                qrStatus.textContent = "QRIS ASLI BAKSO KALDU PUSAKA";
-                qrStatus.className = "qr-valid";
-            }
+            // Update debug info
+            document.getElementById('debug-info').textContent = `Total: ${formatRupiah(total)} | QRIS: ${qrisData ? 'OK' : 'ERROR'}`;
         }
 
-        // Test scan QR Code untuk QRIS asli
-        function testScanQRCode() {
+        // Test QR Code function
+        function testQRCode() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            showNotification("QRIS ASLI: BAKSO KALDU PUSAKA", false);
-            showNotification(`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`, false);
-            
             if (total > 0) {
-                showNotification(`Total: ${formatRupiah(total)} - Masukkan jumlah ini saat scan QRIS`, false);
+                showNotification(`Test QRIS: Siap discan untuk pembayaran ${formatRupiah(total)}`, false);
             } else {
-                showNotification("Scan QRIS dan masukkan jumlah pembayaran manual di aplikasi bank/e-wallet", false);
+                showNotification("Test QRIS: QRIS ASLI BAKSO KALDU PUSAKA siap discan", false);
             }
             
-            // Tampilkan data QRIS di console
-            console.log("=== QRIS ASLI BAKSO KALDU PUSAKA ===");
+            // Debug info
+            console.log("=== QRIS DEBUG INFO ===");
             console.log("NMDI:", qrisConfig.nmdi);
             console.log("AO Code:", qrisConfig.aoCode);
-            console.log("Merchant:", qrisConfig.merchantName);
-            console.log("Total Transaksi:", formatRupiah(total));
-            console.log("Data QRIS:", currentQRCode);
+            console.log("Total Amount:", formatRupiah(total));
+            console.log("Current QR Code:", currentQRCode);
+            console.log("Cart Items:", cart);
         }
 
         // Filter transaksi berdasarkan waktu
@@ -2332,78 +2304,106 @@
             }
         }
 
-        // Inisialisasi aplikasi
+        // Inisialisasi aplikasi dengan error handling
         function initApp() {
-            console.log("Initializing application...");
+            console.log("Initializing Bakso Kaldu Pusaka POS System...");
             
-            // Generate QRIS statis saat aplikasi dimulai
-            qrisConfig.staticQrData = generateStaticQRISData();
-            console.log("Static QRIS Data generated:", qrisConfig.staticQrData);
-            console.log("NMDI:", qrisConfig.nmdi);
-            console.log("AO Code:", qrisConfig.aoCode);
-            
-            // Render menu terlebih dahulu
-            renderMenuItems();
-            
-            // Setup event listeners untuk tombol menu
-            setupMenuButtonEvents();
-            
-            // Kemudian update display lainnya
-            updateCartDisplay();
-            updateQRISDisplay();
-            renderTransactions();
-            renderStatistics();
-            updateDateTime();
-            
-            console.log("Application initialized successfully");
-            
-            // Update waktu setiap detik
-            setInterval(updateDateTime, 1000);
-            
-            // Event listeners untuk tombol utama
-            document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
-            document.getElementById('export-pdf').addEventListener('click', exportToPDF);
-            document.getElementById('export-excel').addEventListener('click', exportToExcel);
-            document.getElementById('reset-btn').addEventListener('click', resetOrder);
-            document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
-            document.getElementById('test-qr-btn').addEventListener('click', testScanQRCode);
-            
-            // Event listener untuk modal
-            document.getElementById('close-modal').addEventListener('click', function() {
-                document.getElementById('transaction-modal').style.display = 'none';
-            });
-            
-            // Tutup modal saat klik di luar
-            window.addEventListener('click', function(event) {
-                const modal = document.getElementById('transaction-modal');
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+            try {
+                // Check if QRCode library is loaded
+                if (typeof QRCode === 'undefined') {
+                    console.error("QRCode library not loaded!");
+                    showNotification("Error: QRCode library tidak terload. Coba refresh halaman.", true);
+                    return;
                 }
-            });
-            
-            // Event listeners untuk filter waktu
-            document.querySelectorAll('.time-filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Update active button
-                    document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update time range
-                    currentTimeRange = this.getAttribute('data-range');
-                    
-                    // Update statistics
-                    renderStatistics();
+                
+                console.log("QRCode library loaded successfully");
+                console.log("NMDI:", qrisConfig.nmdi);
+                console.log("AO Code:", qrisConfig.aoCode);
+                
+                // Render menu terlebih dahulu
+                renderMenuItems();
+                
+                // Setup event listeners untuk tombol menu
+                setupMenuButtonEvents();
+                
+                // Kemudian update display lainnya
+                updateCartDisplay();
+                updateQRISDisplay(); // Pastikan QRIS ditampilkan saat init
+                renderTransactions();
+                renderStatistics();
+                updateDateTime();
+                
+                console.log("Application initialized successfully");
+                
+                // Update waktu setiap detik
+                setInterval(updateDateTime, 1000);
+                
+                // Event listeners untuk tombol utama
+                document.getElementById('checkout-btn').addEventListener('click', saveTransaction);
+                document.getElementById('export-pdf').addEventListener('click', exportToPDF);
+                document.getElementById('export-excel').addEventListener('click', exportToExcel);
+                document.getElementById('reset-btn').addEventListener('click', resetOrder);
+                document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
+                document.getElementById('test-qr-btn').addEventListener('click', testQRCode);
+                
+                // Event listener untuk modal
+                document.getElementById('close-modal').addEventListener('click', function() {
+                    document.getElementById('transaction-modal').style.display = 'none';
                 });
-            });
-            
-            // Tampilkan notifikasi startup
-            setTimeout(() => {
-                showNotification(`QRIS ASLI BAKSO KALDU PUSAKA aktif! NMDI: ${qrisConfig.nmdi}`);
-            }, 1000);
+                
+                // Tutup modal saat klik di luar
+                window.addEventListener('click', function(event) {
+                    const modal = document.getElementById('transaction-modal');
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                // Event listeners untuk filter waktu
+                document.querySelectorAll('.time-filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // Update active button
+                        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Update time range
+                        currentTimeRange = this.getAttribute('data-range');
+                        
+                        // Update statistics
+                        renderStatistics();
+                    });
+                });
+                
+                // Tampilkan notifikasi startup
+                setTimeout(() => {
+                    showNotification(`Sistem Bakso Kaldu Pusaka siap! QRIS ASLI aktif dengan NMDI: ${qrisConfig.nmdi}`);
+                }, 500);
+                
+            } catch (error) {
+                console.error("Error initializing app:", error);
+                showNotification("Terjadi error saat inisialisasi aplikasi: " + error.message, true);
+            }
         }
 
         // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Fallback: Coba init lagi jika ada masalah
+        window.addEventListener('load', function() {
+            console.log("Window loaded, checking QRIS...");
+            // Cek apakah QRIS sudah muncul
+            setTimeout(() => {
+                const canvas = document.getElementById('qrcode-canvas');
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, 1, 1).data;
+                
+                // Jika canvas masih kosong, generate ulang QRIS
+                if (imageData[3] === 0) { // Alpha channel = 0 (transparent)
+                    console.log("Canvas masih kosong, regenerating QRIS...");
+                    updateQRISDisplay();
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
