@@ -284,8 +284,8 @@
         }
         
         .qris-container {
-            width: 220px;
-            height: 220px;
+            width: 250px;
+            height: 250px;
             margin: 0 auto 15px;
             background: white;
             border-radius: 10px;
@@ -295,13 +295,14 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
         }
         
         #qris-image {
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             border-radius: 5px;
-            object-fit: cover;
         }
         
         .qris-overlay {
@@ -314,9 +315,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             color: #000;
             border-radius: 5px;
+            display: none;
         }
         
         .qris-logo {
@@ -902,34 +904,12 @@
             display: inline-block;
         }
         
-        .qris-placeholder {
-            width: 200px;
-            height: 200px;
-            background: #f0f0f0;
-            border: 2px dashed #ccc;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        /* Styling untuk QRIS ASLI yang akan di-crop */
         .qris-image-container {
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             border-radius: 5px;
             position: relative;
-        }
-        
-        .qris-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
         
         .qris-scan-area {
@@ -957,6 +937,16 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        .image-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -1027,18 +1017,20 @@
                     </div>
                     
                     <div class="qris-container">
-                        <!-- QRIS ASLI dari foto -->
+                        <!-- QRIS ASLI dari link https://ibb.co.com/cSCS46MK -->
                         <div class="qris-image-container">
-                            <img id="qris-image" src="https://via.placeholder.com/200x200/FFFFFF/2196F3?text=QRIS+BAKSO+KALDU+PUSAKA" alt="QRIS Bakso Kaldu Pusaka">
+                            <img id="qris-image" 
+                                 src="https://i.ibb.co/cSCS46MK/Whats-App-Image-2026-02-03-at-18-42-09.jpg" 
+                                 alt="QRIS Bakso Kaldu Pusaka"
+                                 onload="showNotification('QRIS ASLI berhasil dimuat!', false)"
+                                 onerror="handleQRISError()">
                             <div class="qris-scan-area"></div>
                         </div>
-                        <div class="qris-overlay" id="qris-overlay" style="display: none;">
-                            <div class="qris-logo">
-                                <i class="fas fa-qrcode"></i>
+                        <div class="qris-overlay" id="qris-overlay">
+                            <div class="image-loading">
+                                <div class="loading"></div>
+                                <p>Memuat QRIS...</p>
                             </div>
-                            <div class="qris-amount" id="qris-amount">Rp 0</div>
-                            <div class="qris-merchant">BAKSO KALDU PUSAKA</div>
-                            <div class="qris-merchant" style="font-size: 0.7rem;">NMDI: ID1025450423864</div>
                         </div>
                     </div>
                     
@@ -1155,7 +1147,7 @@
         
         <footer>
             <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + QRIS ASLI + Dashboard. Semua hak dilindungi.</p>
-            <p>Versi 2.2 | QRIS ASLI BERFUNGSI | NMDI: ID1025450423864 | Terakhir diperbarui: Maret 2024</p>
+            <p>Versi 2.3 | QRIS ASLI BERFUNGSI | NMDI: ID1025450423864 | Terakhir diperbarui: Maret 2024</p>
             <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
                 <i class="fas fa-trash-alt"></i> Reset Semua Data
             </button>
@@ -1182,7 +1174,7 @@
     </div>
 
     <script>
-        // Data menu dari gambar yang diberikan - FIXED
+        // Data menu dari gambar yang diberikan
         const menuData = {
             main: [
                 { id: 1, name: "Bakso daging", price: 25000, category: "utama" },
@@ -1217,7 +1209,9 @@
             merchantCity: "JAKARTA",
             merchantCategory: "5812",
             website: "www.aspi-qris.id",
-            paymentMethod: "QRIS"
+            paymentMethod: "QRIS",
+            // URL QRIS asli dari ImgBB
+            qrisImageUrl: "https://i.ibb.co/cSCS46MK/Whats-App-Image-2026-02-03-at-18-42-09.jpg"
         };
 
         // State aplikasi
@@ -1280,14 +1274,40 @@
             }, 3000);
         }
 
-        // Update tampilan QRIS (tanpa generate QR Code)
+        // Handle error saat load QRIS image
+        function handleQRISError() {
+            const overlay = document.getElementById('qris-overlay');
+            overlay.style.display = 'flex';
+            overlay.innerHTML = `
+                <div style="text-align: center; color: #666;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff9800; margin-bottom: 10px;"></i>
+                    <p>QRIS tidak dapat dimuat</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Pastikan koneksi internet stabil</p>
+                </div>
+            `;
+            
+            const qrStatus = document.getElementById('qr-status');
+            qrStatus.textContent = "QRIS Error - Coba Refresh";
+            qrStatus.className = "qr-invalid";
+            
+            showNotification("Gagal memuat QRIS. Cek koneksi internet.", true);
+        }
+
+        // Update tampilan QRIS
         function updateQRISDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
             // Update payment amount displays
             document.getElementById('payment-amount').textContent = formatRupiah(total);
-            document.getElementById('qris-amount').textContent = formatRupiah(total);
             document.getElementById('total').textContent = formatRupiah(total);
+            
+            // Hide overlay jika QRIS sudah dimuat
+            const qrisImage = document.getElementById('qris-image');
+            const overlay = document.getElementById('qris-overlay');
+            
+            if (qrisImage.complete && qrisImage.naturalHeight !== 0) {
+                overlay.style.display = 'none';
+            }
             
             // Update instructions based on total
             const instructions = document.getElementById('payment-instructions');
@@ -1354,6 +1374,7 @@
             console.log("AO Code:", qrisConfig.aoCode);
             console.log("Merchant:", qrisConfig.merchantName);
             console.log("Total Transaksi:", formatRupiah(total));
+            console.log("QRIS Image URL:", qrisConfig.qrisImageUrl);
         }
 
         // Filter transaksi berdasarkan waktu
@@ -1671,7 +1692,7 @@
             return allItems.find(item => item.id === id);
         }
 
-        // Render menu items - FIXED VERSION
+        // Render menu items
         function renderMenuItems() {
             console.log("Rendering menu items...");
             
@@ -1753,18 +1774,16 @@
             console.log("Menu rendering completed");
         }
 
-        // Setup event listeners untuk tombol menu - FIXED
+        // Setup event listeners untuk tombol menu
         function setupMenuButtonEvents() {
             // Event delegation untuk tombol + dan -
             document.addEventListener('click', function(event) {
                 const target = event.target;
-                console.log("Clicked:", target);
                 
                 // Handle tombol +
                 if (target.closest('.increase-btn')) {
                     const button = target.closest('.increase-btn');
                     const id = parseInt(button.getAttribute('data-id'));
-                    console.log("Increase button clicked for ID:", id);
                     increaseQuantity(id);
                 }
                 
@@ -1772,7 +1791,6 @@
                 else if (target.closest('.decrease-btn')) {
                     const button = target.closest('.decrease-btn');
                     const id = parseInt(button.getAttribute('data-id'));
-                    console.log("Decrease button clicked for ID:", id);
                     decreaseQuantity(id);
                 }
             });
@@ -1780,7 +1798,6 @@
 
         // Tambah jumlah item
         function increaseQuantity(id) {
-            console.log("Increasing quantity for ID:", id);
             const itemInCart = cart.find(item => item.id === id);
             
             if (itemInCart) {
@@ -1806,7 +1823,6 @@
 
         // Kurangi jumlah item
         function decreaseQuantity(id) {
-            console.log("Decreasing quantity for ID:", id);
             const itemIndex = cart.findIndex(item => item.id === id);
             
             if (itemIndex !== -1) {
@@ -1827,7 +1843,6 @@
         // Update tampilan keranjang
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
-            console.log("Updating cart display. Cart items:", cart);
             
             // Update tampilan jumlah di menu
             cart.forEach(item => {
@@ -1937,7 +1952,7 @@
             const transaction = {
                 id: Date.now(),
                 date: new Date().toLocaleString('id-ID'),
-                items: [...cart.map(item => ({...item}))], // Deep copy items
+                items: [...cart.map(item => ({...item}))],
                 total,
                 paymentMethod: "QRIS ASLI",
                 nmdi: qrisConfig.nmdi,
@@ -1949,7 +1964,6 @@
             transactions.unshift(transaction);
             localStorage.setItem('baksoTransactions', JSON.stringify(transactions));
             
-            // Tampilkan konfirmasi pembayaran QRIS
             showNotification(`Transaksi berhasil disimpan! Total: ${formatRupiah(total)} - QRIS ASLI tercatat`, false);
             
             // Update semua tampilan
@@ -1964,7 +1978,7 @@
             updateQRISDisplay();
         }
 
-        // Render riwayat transaksi dengan detail
+        // Render riwayat transaksi
         function renderTransactions() {
             const container = document.getElementById('transactions-container');
             
@@ -1992,7 +2006,6 @@
             transactions.forEach((transaction, index) => {
                 const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                 
-                // Buat ringkasan detail pesanan
                 let orderSummary = '';
                 transaction.items.slice(0, 2).forEach(item => {
                     orderSummary += `${item.quantity}x ${item.name}<br>`;
@@ -2027,7 +2040,6 @@
                 `;
             });
             
-            // Hitung total keseluruhan
             const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
             
             tableHTML += `
@@ -2043,7 +2055,6 @@
             
             container.innerHTML = tableHTML;
             
-            // Add event listeners untuk tombol lihat detail
             document.querySelectorAll('.view-details-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const transactionData = JSON.parse(this.getAttribute('data-transaction'));
@@ -2063,7 +2074,6 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Judul
                 doc.setFontSize(18);
                 doc.setTextColor(198, 40, 40);
                 doc.text("LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS ASLI", 20, 20);
@@ -2074,7 +2084,6 @@
                 doc.text(`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`, 20, 37);
                 doc.text(`QRIS ASLI - Valid untuk Pembayaran Nyata`, 20, 44);
                 
-                // Data transaksi
                 const headers = [['No', 'Tanggal', 'Detail Pesanan', 'Jml Item', 'Total', 'Status']];
                 const data = transactions.map((transaction, index) => {
                     const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -2092,7 +2101,6 @@
                     ];
                 });
                 
-                // Total keseluruhan
                 const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
                 
                 data.push([
@@ -2122,7 +2130,7 @@
                         fontStyle: 'bold'
                     },
                     columnStyles: {
-                        2: { cellWidth: 60 } // Lebar kolom detail pesanan
+                        2: { cellWidth: 60 }
                     },
                     didDrawPage: function(data) {
                         doc.setFontSize(8);
@@ -2148,10 +2156,8 @@
             }
             
             try {
-                // Siapkan data untuk Excel
                 const data = [];
                 
-                // Header
                 data.push(['LAPORAN PENJUALAN BAKSO KALDU PUSAKA - QRIS ASLI']);
                 data.push([`Tanggal cetak: ${new Date().toLocaleDateString('id-ID')}`]);
                 data.push([`NMDI: ${qrisConfig.nmdi} | AO: ${qrisConfig.aoCode}`]);
@@ -2160,7 +2166,6 @@
                 data.push([]);
                 data.push(['No', 'Tanggal/Waktu', 'Detail Pesanan', 'Jumlah Item', 'Total', 'Status', 'NMDI']);
                 
-                // Data transaksi
                 transactions.forEach((transaction, index) => {
                     const itemCount = transaction.items.reduce((sum, item) => sum + item.quantity, 0);
                     const orderDetails = transaction.items.map(item => 
@@ -2178,32 +2183,27 @@
                     ]);
                 });
                 
-                // Total keseluruhan
                 const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
                 
                 data.push([]);
                 data.push(['', 'TOTAL KESELURUHAN', '', '', overallTotal, '', '']);
                 
-                // Buat worksheet
                 const ws = XLSX.utils.aoa_to_sheet(data);
                 
-                // Format kolom
                 const wscols = [
-                    {wch: 5},   // No
-                    {wch: 25},  // Tanggal
-                    {wch: 50},  // Detail Pesanan
-                    {wch: 12},  // Jumlah Item
-                    {wch: 15},  // Total
-                    {wch: 12},  // Status
-                    {wch: 20}   // NMDI
+                    {wch: 5},
+                    {wch: 25},
+                    {wch: 50},
+                    {wch: 12},
+                    {wch: 15},
+                    {wch: 12},
+                    {wch: 20}
                 ];
                 ws['!cols'] = wscols;
                 
-                // Buat workbook
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Laporan Penjualan");
                 
-                // Ekspor ke file
                 XLSX.writeFile(wb, `Laporan_Penjualan_Bakso_QRIS_ASLI_${new Date().toISOString().slice(0,10)}.xlsx`);
                 showNotification('Laporan Excel berhasil diekspor!');
             } catch (error) {
@@ -2227,7 +2227,7 @@
             }
         }
 
-        // Reset semua data (termasuk riwayat)
+        // Reset semua data
         function resetAllData() {
             if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
                 cart = [];
@@ -2241,30 +2241,30 @@
             }
         }
 
-        // Inisialisasi aplikasi dengan error handling
+        // Inisialisasi aplikasi
         function initApp() {
             console.log("Initializing Bakso Kaldu Pusaka POS System...");
+            console.log("QRIS Image URL:", qrisConfig.qrisImageUrl);
             
             try {
-                console.log("NMDI:", qrisConfig.nmdi);
-                console.log("AO Code:", qrisConfig.aoCode);
+                // Setup QRIS image
+                const qrisImage = document.getElementById('qris-image');
+                qrisImage.src = qrisConfig.qrisImageUrl;
                 
-                // Render menu terlebih dahulu - WAIT FOR DOM
-                setTimeout(() => {
-                    renderMenuItems();
-                    
-                    // Setup event listeners untuk tombol menu
-                    setupMenuButtonEvents();
-                    
-                    // Kemudian update display lainnya
-                    updateCartDisplay();
-                    updateQRISDisplay();
-                    renderTransactions();
-                    renderStatistics();
-                    updateDateTime();
-                    
-                    console.log("Application initialized successfully");
-                }, 100);
+                // Render menu
+                renderMenuItems();
+                
+                // Setup event listeners
+                setupMenuButtonEvents();
+                
+                // Update displays
+                updateCartDisplay();
+                updateQRISDisplay();
+                renderTransactions();
+                renderStatistics();
+                updateDateTime();
+                
+                console.log("Application initialized successfully");
                 
                 // Update waktu setiap detik
                 setInterval(updateDateTime, 1000);
@@ -2293,14 +2293,10 @@
                 // Event listeners untuk filter waktu
                 document.querySelectorAll('.time-filter-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        // Update active button
                         document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         
-                        // Update time range
                         currentTimeRange = this.getAttribute('data-range');
-                        
-                        // Update statistics
                         renderStatistics();
                     });
                 });
@@ -2319,19 +2315,25 @@
         // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
         
-        // Fallback: Coba init lagi jika ada masalah
+        // Fallback jika QRIS image gagal load
         window.addEventListener('load', function() {
-            console.log("Window loaded, checking if menus rendered...");
-            
-            // Cek apakah menu sudah dirender
             setTimeout(() => {
-                const mainMenu = document.getElementById('main-menu-items');
-                if (mainMenu && mainMenu.children.length === 0) {
-                    console.log("Menus not rendered, retrying...");
-                    renderMenuItems();
-                    setupMenuButtonEvents();
+                const qrisImage = document.getElementById('qris-image');
+                const overlay = document.getElementById('qris-overlay');
+                
+                if (!qrisImage.complete || qrisImage.naturalHeight === 0) {
+                    console.log("QRIS image not loaded, showing overlay");
+                    overlay.style.display = 'flex';
+                    overlay.innerHTML = `
+                        <div style="text-align: center; color: #666;">
+                            <i class="fas fa-qrcode" style="font-size: 3rem; color: #2196F3; margin-bottom: 10px;"></i>
+                            <p>QRIS ASLI BAKSO KALDU PUSAKA</p>
+                            <p style="font-size: 0.9rem; margin-top: 5px;">NMDI: ${qrisConfig.nmdi}</p>
+                            <p style="font-size: 0.8rem; margin-top: 5px;">Scan QRIS untuk pembayaran</p>
+                        </div>
+                    `;
                 }
-            }, 500);
+            }, 2000);
         });
     </script>
 </body>
