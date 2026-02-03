@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -124,6 +123,7 @@
             margin-bottom: 15px;
             padding-left: 10px;
             border-left: 4px solid #c62828;
+            font-size: 1.3rem;
         }
         
         .menu-item {
@@ -142,10 +142,11 @@
         .menu-item-info {
             flex: 1;
         }
-        
-        .menu-item-name {
+          .menu-item-name {
             font-weight: 600;
             font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 3px;
         }
         
         .menu-item-price {
@@ -186,6 +187,8 @@
             min-width: 40px;
             text-align: center;
             font-weight: 600;
+            color: #333;
+            font-size: 1rem;
         }
         
         .cart-items {
@@ -219,11 +222,14 @@
         
         .cart-item-name {
             flex: 1;
+            color: #333;
+            font-weight: 500;
         }
         
         .cart-item-quantity {
             font-weight: 600;
             margin: 0 10px;
+            color: #333;
         }
         
         .cart-item-price {
@@ -283,9 +289,8 @@
             border-radius: 10px;
             padding: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .qris-pattern {
+            }
+             .qris-pattern {
             width: 100%;
             height: 100%;
             background: 
@@ -294,8 +299,9 @@
             border-radius: 5px;
             position: relative;
             overflow: hidden;
-}
-     .qris-pattern::before {
+        }
+        
+        .qris-pattern::before {
             content: '';
             position: absolute;
             top: 10%;
@@ -433,14 +439,8 @@
             display: flex;
             gap: 10px;
             margin-top: 10px;
-        }
-        
-        .export-options .btn {
-            flex: 1;
-            padding: 12px;
-            font-size: 0.9rem;
-              }
-  /* Dashboard Section */
+                }
+           /* Dashboard Section */
         .dashboard-section {
             margin-bottom: 40px;
         }
@@ -519,6 +519,7 @@
             font-size: 2rem;
             font-weight: 700;
             margin: 10px 0;
+            color: #333;
         }
         
         .stat-label {
@@ -545,7 +546,6 @@
             padding: 25px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
-        
         .chart-title {
             color: #c62828;
             margin-bottom: 20px;
@@ -581,6 +581,7 @@
         .top-items-table td {
             padding: 12px;
             border-bottom: 1px solid #eee;
+            color: #333;
         }
         
         .top-items-table tr:hover {
@@ -624,6 +625,7 @@
         .transactions-table td {
             padding: 12px;
             border-bottom: 1px solid #eee;
+            color: #333;
         }
         
         .transactions-table tr:hover {
@@ -643,11 +645,13 @@
         
         .transaction-item-name {
             flex: 1;
+            color: #333;
         }
         
         .transaction-item-qty {
             margin: 0 10px;
             font-weight: 600;
+            color: #333;
         }
         
         .transaction-item-price {
@@ -685,8 +689,9 @@
             border-top: 1px solid #ddd;
             color: #666;
             font-size: 0.9rem;
-}
-   .notification {
+        }
+        
+        .notification {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -723,8 +728,7 @@
             justify-content: center;
             gap: 8px;
         }
-        
-        .time-filter {
+         .time-filter {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
@@ -738,6 +742,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            color: #333;
         }
         
         .time-filter-btn.active {
@@ -848,8 +853,7 @@
                         <!-- Menu items akan diisi JavaScript -->
                     </div>
                 </div>
-                
-                <div class="menu-category">
+                  <div class="menu-category">
                     <h3>Menu Tambahan</h3>
                     <div id="additional-menu-items">
                         <!-- Menu items akan diisi JavaScript -->
@@ -929,14 +933,14 @@
                             <i class="fas fa-file-excel"></i> Ekspor Excel
                         </button>
                     </div>
-                    
-                    <button class="btn btn-reset" id="reset-btn">
+                     <button class="btn btn-reset" id="reset-btn">
                         <i class="fas fa-redo"></i> Reset Pesanan
                     </button>
                 </div>
             </div>
         </div>
-      <!-- Dashboard Statistik -->
+        
+        <!-- Dashboard Statistik -->
         <div class="dashboard-section">
             <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Statistik Penjualan</h2>
             
@@ -981,10 +985,9 @@
                 <!-- Riwayat transaksi akan diisi JavaScript -->
             </div>
         </div>
-        
         <footer>
             <p>© 2024 Bakso Kaldu Pusaka - Sistem Penghitung Data Penjualan + QRIS + Dashboard. Semua hak dilindungi.</p>
-            <p>Versi 1.3 | Dengan QRIS Detail & Riwayat Lengkap | Terakhir diperbarui: Maret 2024</p>
+            <p>Versi 1.4 | Menu Fixed & QRIS Lengkap | Terakhir diperbarui: Maret 2024</p>
             <button class="btn btn-reset" id="reset-all-btn" style="margin-top: 15px; padding: 10px 20px; font-size: 0.9rem;">
                 <i class="fas fa-trash-alt"></i> Reset Semua Data
             </button>
@@ -1037,7 +1040,8 @@
                 { id: 17, name: "Teh botol", price: 8000, category: "minuman" }
             ]
         };
-// QRIS Configuration
+
+        // QRIS Configuration
         const qrisConfig = {
             nmdi: "ID1025450423864",
             aoCode: "AO1",
@@ -1061,7 +1065,6 @@
                 minimumFractionDigits: 0
             }).format(amount);
         }
-
         // Format angka tanpa Rp
         function formatNumber(amount) {
             return new Intl.NumberFormat('id-ID', {
@@ -1104,9 +1107,8 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
-        }
-
-        // Generate QRIS data string untuk pembayaran
+                    }
+           // Generate QRIS data string untuk pembayaran
         function generateQRISData(totalAmount) {
             // Format data QRIS sesuai standar
             const qrisData = {
@@ -1133,8 +1135,7 @@
         // Update QRIS display dengan data pembayaran
         function updateQRISDisplay() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            // Update payment amount
+              // Update payment amount
             document.getElementById('payment-amount').textContent = formatRupiah(total);
             document.getElementById('qris-amount').textContent = formatRupiah(total);
             
@@ -1162,9 +1163,8 @@
                 paymentStatus.style.backgroundColor = '#e8f5e9';
                 paymentStatus.style.color = '#2e7d32';
             }
-        }
-
-        // Filter transaksi berdasarkan waktu
+                }
+             // Filter transaksi berdasarkan waktu
         function filterTransactionsByTimeRange(transactions, range) {
             const now = new Date();
             let filtered = [...transactions];
@@ -1194,8 +1194,9 @@
             }
             
             return filtered;
-}
-// Hitung statistik
+        }
+
+        // Hitung statistik
         function calculateStatistics(filteredTransactions) {
             if (filteredTransactions.length === 0) {
                 return {
@@ -1219,8 +1220,7 @@
             const totalItems = filteredTransactions.reduce((sum, t) => {
                 return sum + t.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
             }, 0);
-            
-            // Hitung rata-rata transaksi
+               // Hitung rata-rata transaksi
             const averageTransaction = totalIncome / totalTransactions;
             
             // Hitung item terlaris
@@ -1374,63 +1374,7 @@
                     }
                 }
             });
-        }
-
-        // Render chart kategori
-        function renderCategoryChart(categoryData) {
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            
-            // Destroy existing chart if exists
-            if (categoryChartInstance) {
-                categoryChartInstance.destroy();
-            }
-            
-            const labels = ['Menu Utama', 'Menu Tambahan', 'Minuman'];
-            const data = [
-                categoryData.utama || 0,
-                categoryData.tambahan || 0,
-                categoryData.minuman || 0
-            ];
-            
-            const backgroundColors = [
-                'rgba(198, 40, 40, 0.7)',
-                'rgba(33, 150, 243, 0.7)',
-                'rgba(255, 152, 0, 0.7)'
-            ];
-            
-            categoryChartInstance = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} item (${percentage}%)`;
-                                }
-                            }
                         }
-                    }
-                }
-            });
-        }
-
         // Render top items
         function renderTopItems(topItems) {
             const container = document.getElementById('top-items-list');
@@ -1455,11 +1399,20 @@
             
             topItems.forEach((item, index) => {
                 const rank = index + 1;
-                let rankClass = '';
-                if (rank === 1) rankClass = 'style="color: #FFD700;"';
-                if (rank === 2) rankClass = 'style="color: #C0C0C0;"';
-                if (rank === 3) rankClass = 'style="color: #CD7F32;"';
-tableHTML += `</tbody></table>`;
+                
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <span class="rank">${rank}</span>
+                        </td>
+                        <td>${item.name}</td>
+                        <td>${item.quantity} porsi</td>
+                        <td><strong>${formatRupiah(item.revenue)}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
 
@@ -1469,13 +1422,18 @@ tableHTML += `</tbody></table>`;
             return allItems.find(item => item.id === id);
         }
 
-        // Render menu items
+        // Render menu items - PERBAIKAN UTAMA DISINI
         function renderMenuItems() {
+            console.log("Rendering menu items...");
+            
             // Menu utama
             const mainMenuContainer = document.getElementById('main-menu-items');
             mainMenuContainer.innerHTML = '';
             
+            console.log("Main menu items:", menuData.main);
+            
             menuData.main.forEach(item => {
+                console.log("Adding main menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1495,11 +1453,14 @@ tableHTML += `</tbody></table>`;
                 `;
                 mainMenuContainer.appendChild(menuItem);
             });
- // Menu tambahan
+               // Menu tambahan
             const additionalMenuContainer = document.getElementById('additional-menu-items');
             additionalMenuContainer.innerHTML = '';
             
+            console.log("Additional menu items:", menuData.additional);
+            
             menuData.additional.forEach(item => {
+                console.log("Adding additional menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1524,7 +1485,10 @@ tableHTML += `</tbody></table>`;
             const drinkMenuContainer = document.getElementById('drink-menu-items');
             drinkMenuContainer.innerHTML = '';
             
+            console.log("Drink menu items:", menuData.drinks);
+            
             menuData.drinks.forEach(item => {
+                console.log("Adding drink menu item:", item);
                 const menuItem = document.createElement('div');
                 menuItem.className = 'menu-item';
                 menuItem.innerHTML = `
@@ -1544,6 +1508,8 @@ tableHTML += `</tbody></table>`;
                 `;
                 drinkMenuContainer.appendChild(menuItem);
             });
+            
+            console.log("Menu rendering completed");
         }
 
         // Tambah jumlah item
@@ -1554,17 +1520,21 @@ tableHTML += `</tbody></table>`;
                 itemInCart.quantity++;
             } else {
                 const menuItem = findMenuItemById(id);
-                cart.push({
-                    id: menuItem.id,
-                    name: menuItem.name,
-                    price: menuItem.price,
-                    quantity: 1
-                });
+                if (menuItem) {
+                    cart.push({
+                        id: menuItem.id,
+                        name: menuItem.name,
+                        price: menuItem.price,
+                        quantity: 1
+                    });
+                }
             }
             
             updateCartDisplay();
             updateQRISDisplay();
-            showNotification(`${findMenuItemById(id).name} ditambahkan ke keranjang`);
+            if (findMenuItemById(id)) {
+                showNotification(`${findMenuItemById(id).name} ditambahkan ke keranjang`);
+            }
         }
 
         // Kurangi jumlah item
@@ -1585,8 +1555,7 @@ tableHTML += `</tbody></table>`;
             updateCartDisplay();
             updateQRISDisplay();
         }
-
-        // Update tampilan keranjang
+            // Update tampilan keranjang
         function updateCartDisplay() {
             const cartContainer = document.getElementById('cart-items-container');
             
@@ -1624,8 +1593,9 @@ tableHTML += `</tbody></table>`;
                     `;
                 });
                 cartContainer.innerHTML = cartHTML;
-}
-    // Hitung total (TANPA PAJAK)
+            }
+            
+            // Hitung total (TANPA PAJAK)
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
             // Update total display
@@ -1675,12 +1645,11 @@ tableHTML += `</tbody></table>`;
                 
                 <div style="margin-top: 20px; padding: 10px; background-color: #f0f8ff; border-radius: 5px; border-left: 4px solid #2196F3;">
                     <p><strong>Informasi QRIS:</strong></p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Data QRIS: ${generateQRISData(transaction.total)}</p>
-                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: Pembayaran Berhasil</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Data QRIS: ${transaction.qrisData || generateQRISData(transaction.total)}</p>
+                    <p style="font-size: 0.9rem; margin: 5px 0;">Status: ${transaction.status || 'Pembayaran Berhasil'}</p>
                 </div>
             `;
-            
-            modalBody.innerHTML = detailsHTML;
+              modalBody.innerHTML = detailsHTML;
             modal.style.display = 'flex';
         }
 
@@ -1788,7 +1757,7 @@ tableHTML += `</tbody></table>`;
                     </tr>
                 `;
             });
-    // Hitung total keseluruhan
+              // Hitung total keseluruhan
             const overallTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
             
             tableHTML += `
@@ -1891,8 +1860,7 @@ tableHTML += `</tbody></table>`;
                 showNotification('Terjadi kesalahan saat mengekspor PDF', true);
             }
         }
-
-        // Ekspor ke Excel
+           // Ekspor ke Excel
         function exportToExcel() {
             if (transactions.length === 0) {
                 showNotification('Tidak ada data transaksi untuk diekspor.', true);
@@ -1961,8 +1929,9 @@ tableHTML += `</tbody></table>`;
                 console.error('Error exporting to Excel:', error);
                 showNotification('Terjadi kesalahan saat mengekspor Excel', true);
             }
-}
-    // Reset pesanan
+        }
+
+        // Reset pesanan
         function resetOrder() {
             if (cart.length === 0) {
                 showNotification('Tidak ada pesanan untuk direset.', true);
@@ -1975,9 +1944,8 @@ tableHTML += `</tbody></table>`;
                 updateQRISDisplay();
                 showNotification('Pesanan telah direset');
             }
-        }
-
-        // Reset semua data (termasuk riwayat)
+                                     }
+            // Reset semua data (termasuk riwayat)
         function resetAllData() {
             if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data termasuk riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')) {
                 cart = [];
@@ -1993,12 +1961,19 @@ tableHTML += `</tbody></table>`;
 
         // Inisialisasi aplikasi
         function initApp() {
+            console.log("Initializing application...");
+            
+            // Render menu terlebih dahulu
             renderMenuItems();
+            
+            // Kemudian update display lainnya
             updateCartDisplay();
             updateQRISDisplay();
             renderTransactions();
             renderStatistics();
             updateDateTime();
+            
+            console.log("Application initialized successfully");
             
             // Update waktu setiap detik
             setInterval(updateDateTime, 1000);
@@ -2037,10 +2012,12 @@ tableHTML += `</tbody></table>`;
                     renderStatistics();
                 });
             });
-        }
-
-        // Jalankan aplikasi saat halaman dimuat
+                }
+          // Jalankan aplikasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
+            
+            
+        
